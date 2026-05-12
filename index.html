@@ -641,6 +641,45 @@ footer a:hover{color:var(--gold)}
           <div class="stat-card"><div class="stat-card-label">Open Reports</div><div class="stat-card-value" id="adm-reports" style="color:var(--danger)">—</div></div>
         </div>
 
+        <!-- Financial Summary -->
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:2rem">
+          <div style="font-size:0.78rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1.25rem">Revenue Breakdown — Two Streams</div>
+
+          <!-- Stream 1 -->
+          <div style="background:var(--bg2);border:1px solid rgba(201,145,61,0.2);border-radius:var(--radius-s);padding:1rem;margin-bottom:0.75rem">
+            <div style="font-size:0.75rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem">Stream 1 — Creator Memberships <span style="background:var(--gold-d);border:1px solid var(--gold-b);padding:1px 8px;border-radius:20px;font-size:0.7rem;margin-left:6px">100% HandHeaven</span></div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem">
+              <div><div style="font-size:0.72rem;color:var(--muted);margin-bottom:2px">Gross</div><div style="font-size:1.1rem;font-family:'Playfair Display',serif;color:var(--white)" id="adm-s1-gross">$0.00</div></div>
+              <div><div style="font-size:0.72rem;color:var(--muted);margin-bottom:2px">Stripe fee (2.9%+$0.30)</div><div style="font-size:1.1rem;font-family:'Playfair Display',serif;color:var(--danger)" id="adm-s1-stripe">-$0.00</div></div>
+              <div><div style="font-size:0.72rem;color:var(--gold);margin-bottom:2px">HH Net</div><div style="font-size:1.1rem;font-family:'Playfair Display',serif;color:var(--gold)" id="adm-s1-net">$0.00</div></div>
+            </div>
+          </div>
+
+          <!-- Stream 2 -->
+          <div style="background:var(--bg2);border:1px solid rgba(76,175,120,0.2);border-radius:var(--radius-s);padding:1rem;margin-bottom:0.75rem">
+            <div style="font-size:0.75rem;color:#4CAF78;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem">Stream 2 — Content Sales & Buyer Subscriptions <span style="background:rgba(76,175,120,0.1);border:1px solid rgba(76,175,120,0.2);padding:1px 8px;border-radius:20px;font-size:0.7rem;margin-left:6px;color:#4CAF78">15% HandHeaven</span></div>
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem">
+              <div><div style="font-size:0.72rem;color:var(--muted);margin-bottom:2px">Gross</div><div style="font-size:1.1rem;font-family:'Playfair Display',serif;color:var(--white)" id="adm-s2-gross">$0.00</div></div>
+              <div><div style="font-size:0.72rem;color:var(--muted);margin-bottom:2px">CCBill (~12%)</div><div style="font-size:1.1rem;font-family:'Playfair Display',serif;color:var(--danger)" id="adm-s2-ccbill">-$0.00</div></div>
+              <div><div style="font-size:0.72rem;color:var(--muted);margin-bottom:2px">Net after fees</div><div style="font-size:1.1rem;font-family:'Playfair Display',serif;color:var(--white)" id="adm-s2-net">$0.00</div></div>
+              <div><div style="font-size:0.72rem;color:var(--muted);margin-bottom:2px">Creator 85%</div><div style="font-size:1.1rem;font-family:'Playfair Display',serif;color:var(--muted)" id="adm-s2-creator">$0.00</div></div>
+              <div><div style="font-size:0.72rem;color:#4CAF78;margin-bottom:2px">HH 15%</div><div style="font-size:1.1rem;font-family:'Playfair Display',serif;color:#4CAF78" id="adm-s2-hh">$0.00</div></div>
+            </div>
+          </div>
+
+          <!-- Total -->
+          <div style="background:var(--gold-d);border:1px solid var(--gold-b);border-radius:var(--radius-s);padding:1rem;display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-size:0.75rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:2px">Total HandHeaven Revenue</div>
+              <div style="font-size:0.78rem;color:var(--muted)">Stream 1 net + Stream 2 commission</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold)" id="adm-total-hh">$0.00</div>
+              <div style="font-size:0.72rem;color:var(--muted)" id="adm-total-margin">0% net margin</div>
+            </div>
+          </div>
+        </div>
+
         <!-- Tabs -->
         <div style="display:flex;gap:0;border-bottom:1px solid var(--border2);margin-bottom:1.5rem">
           <button class="profile-tab active" onclick="switchAdminTab('creators',this)">Creators</button>
@@ -1780,12 +1819,13 @@ function checkAdminPw() {
 }
 
 async function loadAdminData() {
-  const [creatorsRes, buyersRes, subsRes, reportsRes, payoutsRes] = await Promise.all([
+  const [creatorsRes, buyersRes, subsRes, reportsRes, payoutsRes, earningsRes] = await Promise.all([
     db.from('profiles').select('*').eq('role','creator').order('created_at',{ascending:false}),
     db.from('profiles').select('*').eq('role','buyer').order('created_at',{ascending:false}),
     db.from('subscriptions').select('*').eq('status','active'),
     db.from('reports').select('*,reporter:reporter_id(display_name,username),reported:reported_id(display_name,username)').eq('status','open').order('created_at',{ascending:false}),
-    db.from('profiles').select('pending_payout,display_name,username').eq('role','creator').gt('pending_payout',0)
+    db.from('profiles').select('pending_payout,display_name,username').eq('role','creator').gt('pending_payout',0),
+    db.from('earnings').select('gross_amount,platform_fee,net_amount,type')
   ]);
 
   const creators = creatorsRes.data || [];
@@ -1800,6 +1840,39 @@ async function loadAdminData() {
   document.getElementById('adm-subs').textContent = subs.length;
   document.getElementById('adm-payouts').textContent = `$${totalPending.toFixed(2)}`;
   document.getElementById('adm-reports').textContent = reports.length;
+
+  // Financial summary — two streams
+  const earnings = earningsRes.data || [];
+  const subEarnings = earnings.filter(e => e.type === 'subscription');
+  const ppvEarnings = earnings.filter(e => e.type === 'purchase');
+
+  // Stream 1: Creator memberships → 100% HH minus Stripe
+  const s1Gross = subEarnings.reduce((s,e) => s + parseFloat(e.gross_amount||0), 0);
+  const s1Stripe = (s1Gross * 0.029) + (subEarnings.length * 0.30);
+  const s1Net = s1Gross - s1Stripe;
+
+  // Stream 2: Content sales → minus CCBill → 15% HH / 85% creator
+  const s2Gross = ppvEarnings.reduce((s,e) => s + parseFloat(e.gross_amount||0), 0);
+  const s2Ccbill = s2Gross * 0.12;
+  const s2Net = s2Gross - s2Ccbill;
+  const s2Creator = s2Net * 0.85;
+  const s2Hh = s2Net * 0.15;
+
+  const totalHh = s1Net + s2Hh;
+  const totalGross = s1Gross + s2Gross;
+  const margin = totalGross > 0 ? Math.round((totalHh / totalGross) * 100) : 0;
+
+  const el = id => document.getElementById(id);
+  if(el('adm-s1-gross')) el('adm-s1-gross').textContent = `$${s1Gross.toFixed(2)}`;
+  if(el('adm-s1-stripe')) el('adm-s1-stripe').textContent = `-$${s1Stripe.toFixed(2)}`;
+  if(el('adm-s1-net')) el('adm-s1-net').textContent = `$${s1Net.toFixed(2)}`;
+  if(el('adm-s2-gross')) el('adm-s2-gross').textContent = `$${s2Gross.toFixed(2)}`;
+  if(el('adm-s2-ccbill')) el('adm-s2-ccbill').textContent = `-$${s2Ccbill.toFixed(2)}`;
+  if(el('adm-s2-net')) el('adm-s2-net').textContent = `$${s2Net.toFixed(2)}`;
+  if(el('adm-s2-creator')) el('adm-s2-creator').textContent = `$${s2Creator.toFixed(2)}`;
+  if(el('adm-s2-hh')) el('adm-s2-hh').textContent = `$${s2Hh.toFixed(2)}`;
+  if(el('adm-total-hh')) el('adm-total-hh').textContent = `$${totalHh.toFixed(2)}`;
+  if(el('adm-total-margin')) el('adm-total-margin').textContent = `${margin}% net margin`;
 
   renderAdminCreators(creators);
   renderAdminBuyers(buyers);
