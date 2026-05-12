@@ -699,18 +699,19 @@ footer a:hover{color:var(--gold)}
       </div>
     </div>
   </div>
-    <div style="margin-bottom:1rem">
-      <span style="font-family:'Playfair Display',serif;color:var(--gold)">HandHeaven</span>
-      <span style="margin:0 1rem;color:var(--border2)">|</span>
-      <a href="#">Terms of Service</a>
-      <span style="margin:0 0.75rem">·</span>
-      <a href="#">Privacy Policy</a>
-      <span style="margin:0 0.75rem">·</span>
-      <a href="#">2257 Compliance</a>
-      <span style="margin:0 0.75rem">·</span>
-      <a href="#">Content Guidelines</a>
-      <span style="margin:0 0.75rem">·</span>
-      <a href="mailto:hello@handheaven.com">Contact</a>
+  <footer>
+    <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem">
+      <span style="font-family:'Playfair Display',serif;font-size:1rem"><span style="color:var(--white);font-style:normal">Hand</span><span style="color:var(--gold);font-style:italic">Heaven</span></span>
+      <span style="color:var(--border2);margin:0 0.25rem">|</span>
+      <a href="#" style="color:var(--muted);font-size:0.8rem">Terms of Service</a>
+      <span style="color:var(--border2)">·</span>
+      <a href="#" style="color:var(--muted);font-size:0.8rem">Privacy Policy</a>
+      <span style="color:var(--border2)">·</span>
+      <a href="#" style="color:var(--muted);font-size:0.8rem">2257 Compliance</a>
+      <span style="color:var(--border2)">·</span>
+      <a href="#" style="color:var(--muted);font-size:0.8rem">Content Guidelines</a>
+      <span style="color:var(--border2)">·</span>
+      <a href="mailto:hello@handheaven.com" style="color:var(--muted);font-size:0.8rem">Contact</a>
     </div>
     <p>© 2026 HandHeaven. All rights reserved. All models are 18+ years of age. 18 U.S.C. § 2257 records are maintained by HandHeaven LLC.</p>
   </footer>
@@ -904,7 +905,7 @@ function verifyAge() {
   const terms = document.getElementById('age-terms').checked;
   if (!m || !d || !y) return showAgeError('Please enter your complete date of birth.');
   if (!terms) return showAgeError('Please accept the terms to continue.');
-  if (y < 1900 || y > 2025) return showAgeError('Please enter a valid birth year.');
+  if (y < 1900 || y > 2006) return showAgeError('You must have been born in 2006 or earlier to enter.');
   const birth = new Date(y, m - 1, d);
   const age = Math.floor((Date.now() - birth) / 31557600000);
   if (age < 18) return showAgeError('You must be 18 or older to enter HandHeaven.');
