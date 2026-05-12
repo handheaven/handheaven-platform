@@ -345,6 +345,7 @@ footer a:hover{color:var(--gold)}
       <label for="age-terms">I confirm I am 18+ years old and agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. I understand this site contains adult content.</label>
     </div>
     <button class="btn btn-gold btn-full" onclick="verifyAge()">Enter HandHeaven</button>
+    <div id="age-error" style="display:none;color:#E05252;font-size:0.82rem;margin-top:0.75rem;padding:0.6rem 1rem;background:rgba(224,82,82,0.1);border-radius:6px;border:1px solid rgba(224,82,82,0.2)"></div>
     <p class="age-warning">By entering you confirm you are of legal age in your jurisdiction to view adult content. HandHeaven complies with 18 U.S.C. § 2257.</p>
   </div>
   </div>
@@ -891,19 +892,26 @@ async function init() {
   });
 }
 
+function showAgeError(msg) {
+  const el = document.getElementById('age-error');
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+
 function verifyAge() {
   const m = +document.getElementById('age-month').value;
   const d = +document.getElementById('age-day').value;
   const y = +document.getElementById('age-year').value;
   const terms = document.getElementById('age-terms').checked;
-  if (!m || !d || !y) return showToast('Please enter your date of birth', 'error');
-  if (!terms) return showToast('Please accept the terms to continue', 'error');
-  const birth = new Date(y, m-1, d);
+  if (!m || !d || !y) return showAgeError('Please enter your complete date of birth.');
+  if (!terms) return showAgeError('Please accept the terms to continue.');
+  if (y < 1900 || y > 2025) return showAgeError('Please enter a valid birth year.');
+  const birth = new Date(y, m - 1, d);
   const age = Math.floor((Date.now() - birth) / 31557600000);
-  if (age < 18 || y < 1900 || y > 2006) return showToast('You must be 18 or older to enter', 'error');
+  if (age < 18) return showAgeError('You must be 18 or older to enter HandHeaven.');
   sessionStorage.setItem('hh_age', '1');
-  hideEl('age-gate');
-  showEl('app', 'block');
+  document.getElementById('age-gate').style.display = 'none';
+  const app = document.getElementById('app');
+  if (app) app.style.display = 'block';
   navigate('home');
 }
 
@@ -1957,6 +1965,8 @@ async function checkAutoban(reportedId) {
     await db.from('profiles').update({is_active: false}).eq('id', reportedId);
   }
 }
+
+async function updateFounderCounter() {
   const { count } = await db.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'creator');
   const taken = count || 0;
   const left = Math.max(0, 20 - taken);
@@ -1966,6 +1976,7 @@ async function checkAutoban(reportedId) {
   if (el('founder-left')) el('founder-left').textContent = left;
   if (el('founder-bar')) el('founder-bar').style.width = pct + '%';
   if (el('t1-left')) el('t1-left').textContent = left;
+}
 }
 
 init();
