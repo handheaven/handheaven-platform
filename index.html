@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HandHeaven — The Premier Hand Content Marketplace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --bg: #0A0908;
+  --bg2: #111010;
+  --bg3: #1C1B1A;
+  --gold: #C9913D;
+  --gold-l: #E5B96A;
+  --gold-d: rgba(201,145,61,0.12);
+  --gold-b: rgba(201,145,61,0.2);
+  --white: #F5F0E8;
+  --muted: #8A8580;
+  --border: rgba(201,145,61,0.15);
+  --border2: rgba(245,240,232,0.08);
+  --danger: #E05252;
+  --success: #4CAF78;
+  --radius: 12px;
+  --radius-s: 8px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--white);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:500;line-height:1.2}
+a{color:var(--gold);text-decoration:none}
+button{cursor:pointer;border:none;outline:none;font-family:'DM Sans',sans-serif}
+input,textarea,select{font-family:'DM Sans',sans-serif}
+img{max-width:100%;display:block}
+
+/* ---- SCROLLBAR ---- */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ---- AGE GATE ---- */
+#age-gate{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:2rem;text-align:center}
+#age-gate.hidden{display:none}
+.age-logo{font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold);letter-spacing:0.08em;margin-bottom:0.5rem}
+.age-tagline{color:var(--muted);font-size:0.85rem;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:3rem}
+.age-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem 3rem;max-width:480px;width:100%}
+.age-box h2{font-size:1.6rem;margin-bottom:1rem}
+.age-box p{color:var(--muted);font-size:0.9rem;margin-bottom:2rem;line-height:1.7}
+.age-inputs{display:flex;gap:0.75rem;margin-bottom:1.5rem;justify-content:center}
+.age-inputs input{background:var(--bg2);border:1px solid var(--border);color:var(--white);border-radius:var(--radius-s);padding:0.75rem;text-align:center;font-size:1rem;width:70px}
+.age-inputs input::placeholder{color:var(--muted)}
+.age-check{display:flex;align-items:flex-start;gap:0.75rem;text-align:left;margin-bottom:1.5rem}
+.age-check input[type=checkbox]{margin-top:3px;accent-color:var(--gold);width:16px;height:16px;flex-shrink:0}
+.age-check label{font-size:0.82rem;color:var(--muted);line-height:1.5}
+.age-check label a{color:var(--gold)}
+.age-warning{font-size:0.75rem;color:var(--muted);margin-top:1rem;border-top:1px solid var(--border2);padding-top:1rem}
+
+/* ---- BUTTONS ---- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.75rem 1.75rem;border-radius:var(--radius-s);font-size:0.9rem;font-weight:500;transition:all 0.2s;letter-spacing:0.02em}
+.btn-gold{background:var(--gold);color:#0A0908;font-weight:600}
+.btn-gold:hover{background:var(--gold-l);transform:translateY(-1px)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--white)}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.btn-ghost{background:transparent;color:var(--muted)}
+.btn-ghost:hover{color:var(--white)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-sm{padding:0.5rem 1rem;font-size:0.82rem}
+.btn-full{width:100%}
+.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none!important}
+
+/* ---- NAV ---- */
+#nav{position:sticky;top:0;z-index:100;background:rgba(10,9,8,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border2);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;gap:1.5rem}
+.nav-logo{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--gold);letter-spacing:0.06em;white-space:nowrap}
+.nav-logo span{font-style:italic;font-weight:400}
+.nav-search{flex:1;max-width:400px;position:relative}
+.nav-search input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--white);padding:0.6rem 1rem 0.6rem 2.5rem;border-radius:30px;font-size:0.85rem;transition:border-color 0.2s}
+.nav-search input:focus{outline:none;border-color:var(--gold)}
+.nav-search input::placeholder{color:var(--muted)}
+.nav-search-icon{position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;font-size:0.9rem}
+.nav-actions{display:flex;align-items:center;gap:0.75rem}
+.nav-avatar{width:36px;height:36px;border-radius:50%;background:var(--gold-d);border:1px solid var(--border);cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:0.8rem;font-weight:600}
+.nav-avatar img{width:100%;height:100%;object-fit:cover}
+.nav-dropdown{position:absolute;top:100%;right:0;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);min-width:200px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.5);display:none}
+.nav-dropdown.open{display:block}
+.nav-dropdown-header{padding:1rem 1.25rem;border-bottom:1px solid var(--border2)}
+.nav-dropdown-header p{font-size:0.8rem;color:var(--muted)}
+.nav-dropdown-header strong{display:block;font-size:0.9rem;color:var(--white)}
+.nav-dropdown a,.nav-dropdown button{display:block;width:100%;text-align:left;padding:0.75rem 1.25rem;font-size:0.88rem;color:var(--white);background:transparent;border:none;border-bottom:1px solid var(--border2);cursor:pointer;transition:background 0.15s}
+.nav-dropdown a:hover,.nav-dropdown button:hover{background:var(--bg2)}
+.nav-dropdown button:last-child{color:var(--danger);border-bottom:none}
+.nav-wrap{position:relative}
+
+/* ---- APP / PAGES ---- */
+#app{display:none}
+#app.visible{display:block}
+.page{display:none}
+.page.active{display:block}
+
+/* ---- HOME ---- */
+.hero{padding:5rem 2rem 3rem;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%, rgba(201,145,61,0.06) 0%, transparent 70%);pointer-events:none}
+.hero-label{font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem}
+.hero h1{font-size:clamp(2.2rem,5vw,4rem);margin-bottom:1.25rem;color:var(--white)}
+.hero h1 em{font-style:italic;color:var(--gold)}
+.hero p{font-size:1rem;color:var(--muted);max-width:520px;margin:0 auto 2.5rem}
+.hero-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.stats-bar{display:flex;gap:2rem;justify-content:center;margin-top:3rem;flex-wrap:wrap}
+.stat-item{text-align:center}
+.stat-num{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--gold)}
+.stat-label{font-size:0.78rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:0.25rem}
+
+.section{padding:2.5rem 2rem}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem}
+.section-header h2{font-size:1.5rem}
+.section-header p{font-size:0.85rem;color:var(--muted)}
+.filter-bar{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:2rem}
+.filter-btn{padding:0.45rem 1.1rem;border-radius:30px;font-size:0.82rem;background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all 0.2s}
+.filter-btn.active,.filter-btn:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-d)}
+
+/* ---- CREATOR GRID ---- */
+.creator-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.5rem}
+.creator-card{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all 0.25s;position:relative}
+.creator-card:hover{border-color:var(--border);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,0.4)}
+.creator-cover{height:140px;background:linear-gradient(135deg,#1C1B1A 0%,#2A2826 100%);position:relative;overflow:hidden}
+.creator-cover img{width:100%;height:100%;object-fit:cover}
+.creator-cover-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem;opacity:0.2}
+.creator-avatar{width:60px;height:60px;border-radius:50%;border:3px solid var(--bg3);background:var(--bg2);position:absolute;bottom:-30px;left:1.25rem;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--gold);font-family:'Playfair Display',serif;font-size:1.3rem}
+.creator-avatar img{width:100%;height:100%;object-fit:cover}
+.creator-card-body{padding:2.25rem 1.25rem 1.25rem}
+.creator-name{font-family:'Playfair Display',serif;font-size:1.05rem;margin-bottom:0.25rem;display:flex;align-items:center;gap:0.5rem}
+.verified-badge{color:var(--gold);font-size:0.75rem}
+.creator-bio{font-size:0.82rem;color:var(--muted);line-height:1.5;margin-bottom:1rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.creator-meta{display:flex;align-items:center;justify-content:space-between}
+.creator-price{font-size:0.88rem;color:var(--gold);font-weight:500}
+.creator-price span{font-size:0.75rem;color:var(--muted);font-weight:400}
+.creator-subs{font-size:0.78rem;color:var(--muted)}
+.creator-tags{display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.75rem}
+.tag{font-size:0.72rem;padding:0.2rem 0.6rem;border-radius:30px;background:var(--gold-d);color:var(--gold);border:1px solid var(--gold-b)}
+.content-preview{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:0.75rem;border-radius:0 0 var(--radius-s) var(--radius-s);overflow:hidden}
+.preview-thumb{height:70px;background:var(--bg2);overflow:hidden;position:relative}
+.preview-thumb img{width:100%;height:100%;object-fit:cover}
+.preview-locked{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);font-size:0.8rem;color:var(--muted)}
+
+/* ---- CREATOR PROFILE ---- */
+.profile-cover{height:280px;background:linear-gradient(135deg,#1C1B1A 0%,#2A2826 100%);position:relative;overflow:hidden}
+.profile-cover img{width:100%;height:100%;object-fit:cover}
+.profile-cover-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,9,8,0.9) 0%,transparent 60%)}
+.profile-header{padding:0 2rem;display:flex;align-items:flex-end;justify-content:space-between;margin-top:-60px;position:relative;z-index:1;flex-wrap:wrap;gap:1rem}
+.profile-avatar{width:110px;height:110px;border-radius:50%;border:4px solid var(--bg);background:var(--bg3);overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--gold);font-family:'Playfair Display',serif;font-size:2.5rem;flex-shrink:0}
+.profile-avatar img{width:100%;height:100%;object-fit:cover}
+.profile-info{padding:1.5rem 2rem}
+.profile-name{font-size:2rem;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.75rem}
+.profile-username{color:var(--muted);font-size:0.9rem;margin-bottom:0.75rem}
+.profile-bio{color:var(--muted);font-size:0.92rem;max-width:600px;line-height:1.7;margin-bottom:1.25rem}
+.profile-stats{display:flex;gap:2rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.profile-stat{text-align:center}
+.profile-stat strong{display:block;font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--white)}
+.profile-stat span{font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em}
+.profile-tabs{display:flex;gap:0;border-bottom:1px solid var(--border2);padding:0 2rem;overflow-x:auto}
+.profile-tab{padding:0.85rem 1.5rem;font-size:0.88rem;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none}
+.profile-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.profile-tab:hover{color:var(--white)}
+.profile-content{padding:2rem}
+.content-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem}
+.content-item{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-s);overflow:hidden;cursor:pointer;transition:all 0.2s;position:relative}
+.content-item:hover{border-color:var(--border);transform:translateY(-2px)}
+.content-thumb{height:180px;background:var(--bg2);position:relative;overflow:hidden}
+.content-thumb img{width:100%;height:100%;object-fit:cover;transition:transform 0.3s}
+.content-item:hover .content-thumb img{transform:scale(1.04)}
+.content-lock{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(10,9,8,0.75);backdrop-filter:blur(4px)}
+.content-lock svg{width:28px;height:28px;color:var(--gold);margin-bottom:0.5rem}
+.content-lock span{font-size:0.82rem;color:var(--gold)}
+.content-item-info{padding:0.75rem}
+.content-item-title{font-size:0.88rem;margin-bottom:0.3rem;color:var(--white)}
+.content-item-price{font-size:0.82rem;color:var(--gold)}
+.sub-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;text-align:center;margin:1.5rem 2rem;max-width:380px}
+.sub-card h3{font-size:1.3rem;margin-bottom:0.5rem}
+.sub-card p{color:var(--muted);font-size:0.88rem;margin-bottom:1.5rem}
+.sub-price{font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--gold);margin-bottom:0.25rem}
+.sub-price sub{font-size:1rem;color:var(--muted)}
+.sub-features{text-align:left;margin-bottom:1.5rem;list-style:none}
+.sub-features li{font-size:0.85rem;color:var(--muted);padding:0.4rem 0;display:flex;align-items:center;gap:0.5rem}
+.sub-features li::before{content:'✦';color:var(--gold);font-size:0.65rem}
+
+/* ---- DASHBOARD ---- */
+.dashboard{padding:2rem;max-width:1100px;margin:0 auto}
+.dashboard-header{margin-bottom:2.5rem}
+.dashboard-header h1{font-size:2rem;margin-bottom:0.5rem}
+.dashboard-header p{color:var(--muted);font-size:0.9rem}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2.5rem}
+.stat-card{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:1.5rem}
+.stat-card-label{font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem}
+.stat-card-value{font-family:'Playfair Display',serif;font-size:2rem;color:var(--white);margin-bottom:0.25rem}
+.stat-card-value.gold{color:var(--gold)}
+.stat-card-sub{font-size:0.78rem;color:var(--muted)}
+.dash-section{margin-bottom:2.5rem}
+.dash-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border2)}
+.dash-section-header h2{font-size:1.1rem}
+.content-list{display:flex;flex-direction:column;gap:0.75rem}
+.content-row{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-s);padding:1rem 1.25rem;display:flex;align-items:center;gap:1.25rem;transition:border-color 0.2s}
+.content-row:hover{border-color:var(--border)}
+.content-row-thumb{width:60px;height:60px;border-radius:var(--radius-s);background:var(--bg2);overflow:hidden;flex-shrink:0}
+.content-row-thumb img{width:100%;height:100%;object-fit:cover}
+.content-row-info{flex:1}
+.content-row-title{font-size:0.92rem;margin-bottom:0.2rem}
+.content-row-meta{font-size:0.78rem;color:var(--muted)}
+.content-row-actions{display:flex;gap:0.5rem}
+.payout-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem}
+.payout-balance{font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--gold);margin:0.75rem 0}
+.payout-note{font-size:0.82rem;color:var(--muted);margin-bottom:1.25rem}
+.payout-history{margin-top:1.25rem;border-top:1px solid var(--border2);padding-top:1.25rem}
+.payout-row{display:flex;justify-content:space-between;padding:0.6rem 0;font-size:0.85rem;border-bottom:1px solid var(--border2)}
+.payout-row:last-child{border-bottom:none}
+.payout-amount{color:var(--success)}
+
+/* ---- ONBOARDING ---- */
+.onboarding{min-height:calc(100vh - 64px);display:flex;align-items:center;justify-content:center;padding:2rem}
+.onboard-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem;max-width:520px;width:100%}
+.onboard-step{margin-bottom:2rem}
+.step-indicator{display:flex;gap:0.5rem;margin-bottom:2rem}
+.step-dot{height:3px;flex:1;border-radius:2px;background:var(--border2);transition:background 0.3s}
+.step-dot.active{background:var(--gold)}
+.step-dot.done{background:var(--gold-l)}
+.onboard-box h2{font-size:1.6rem;margin-bottom:0.5rem}
+.onboard-box p{color:var(--muted);font-size:0.88rem;margin-bottom:2rem}
+.founder-badge{display:inline-flex;align-items:center;gap:0.5rem;background:var(--gold-d);border:1px solid var(--gold-b);border-radius:30px;padding:0.4rem 1rem;font-size:0.8rem;color:var(--gold);margin-bottom:1.5rem}
+
+/* ---- FORMS ---- */
+.form-group{margin-bottom:1.25rem}
+.form-label{display:block;font-size:0.82rem;color:var(--muted);margin-bottom:0.5rem;letter-spacing:0.03em}
+.form-input{width:100%;background:var(--bg2);border:1px solid var(--border2);color:var(--white);padding:0.8rem 1rem;border-radius:var(--radius-s);font-size:0.92rem;transition:border-color 0.2s}
+.form-input:focus{outline:none;border-color:var(--gold)}
+.form-input::placeholder{color:var(--muted)}
+.form-textarea{resize:vertical;min-height:100px}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238A8580' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-hint{font-size:0.78rem;color:var(--muted);margin-top:0.4rem}
+.form-error{font-size:0.82rem;color:var(--danger);margin-top:0.4rem}
+.input-prefix{display:flex;align-items:center;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-s);overflow:hidden}
+.input-prefix span{padding:0 0.75rem;color:var(--muted);font-size:0.9rem;border-right:1px solid var(--border2);white-space:nowrap}
+.input-prefix input{border:none;border-radius:0;background:transparent}
+.price-toggle{display:flex;gap:0.75rem;margin-bottom:1rem}
+.price-opt{flex:1;padding:0.85rem;border:1px solid var(--border2);border-radius:var(--radius-s);cursor:pointer;text-align:center;transition:all 0.2s;background:var(--bg2);font-size:0.85rem;color:var(--muted)}
+.price-opt.selected{border-color:var(--gold);background:var(--gold-d);color:var(--gold)}
+
+/* ---- MODAL ---- */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;display:none;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:460px;max-height:90vh;overflow-y:auto}
+.modal-large{max-width:580px}
+.modal-header{padding:1.5rem 1.75rem 0;display:flex;align-items:center;justify-content:space-between}
+.modal-header h2{font-size:1.35rem}
+.modal-close{background:none;color:var(--muted);font-size:1.3rem;padding:0.25rem;transition:color 0.2s}
+.modal-close:hover{color:var(--white)}
+.modal-body{padding:1.5rem 1.75rem 1.75rem}
+.auth-tabs{display:flex;gap:0;border-bottom:1px solid var(--border2);margin-bottom:1.5rem}
+.auth-tab{flex:1;padding:0.75rem;font-size:0.88rem;color:var(--muted);cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;transition:all 0.2s;font-family:'DM Sans',sans-serif}
+.auth-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.role-selector{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1.5rem}
+.role-opt{border:1px solid var(--border2);border-radius:var(--radius-s);padding:1.25rem;cursor:pointer;transition:all 0.2s;background:var(--bg2)}
+.role-opt:hover{border-color:var(--border)}
+.role-opt.selected{border-color:var(--gold);background:var(--gold-d)}
+.role-opt h4{font-size:0.9rem;margin-bottom:0.25rem}
+.role-opt p{font-size:0.75rem;color:var(--muted)}
+.role-icon{font-size:1.5rem;margin-bottom:0.5rem}
+.divider{text-align:center;position:relative;margin:1.25rem 0}
+.divider::before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:var(--border2)}
+.divider span{background:var(--bg3);padding:0 0.75rem;font-size:0.8rem;color:var(--muted);position:relative}
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:2.5rem;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:1.25rem}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--gold);background:var(--gold-d)}
+.upload-zone-icon{font-size:2.5rem;margin-bottom:0.75rem;opacity:0.4}
+.upload-zone p{font-size:0.85rem;color:var(--muted)}
+.upload-preview{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:0.5rem;margin-bottom:1rem}
+.upload-preview-item{height:80px;border-radius:var(--radius-s);overflow:hidden;position:relative}
+.upload-preview-item img{width:100%;height:100%;object-fit:cover}
+
+/* ---- TOAST ---- */
+#toast-container{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:0.5rem}
+.toast{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-s);padding:0.85rem 1.25rem;font-size:0.85rem;min-width:280px;display:flex;align-items:center;gap:0.75rem;animation:toastIn 0.3s ease;box-shadow:0 8px 24px rgba(0,0,0,0.4)}
+.toast.success{border-color:rgba(76,175,120,0.3)}
+.toast.error{border-color:rgba(224,82,82,0.3)}
+.toast-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.toast.success .toast-dot{background:var(--success)}
+.toast.error .toast-dot{background:var(--danger)}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+/* ---- EMPTY STATE ---- */
+.empty{text-align:center;padding:4rem 2rem}
+.empty-icon{font-size:3rem;opacity:0.2;margin-bottom:1rem}
+.empty h3{font-size:1.2rem;margin-bottom:0.5rem}
+.empty p{color:var(--muted);font-size:0.88rem}
+
+/* ---- LOADING ---- */
+.loader{display:inline-block;width:20px;height:20px;border:2px solid var(--border2);border-top-color:var(--gold);border-radius:50%;animation:spin 0.7s linear infinite}
+.page-loader{display:flex;align-items:center;justify-content:center;padding:4rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.skeleton{background:linear-gradient(90deg,var(--bg3) 25%,var(--bg2) 50%,var(--bg3) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius-s)}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ---- FOOTER ---- */
+footer{border-top:1px solid var(--border2);padding:2rem;text-align:center;color:var(--muted);font-size:0.8rem;margin-top:4rem}
+footer a{color:var(--muted)}
+footer a:hover{color:var(--gold)}
+
+/* ---- RESPONSIVE ---- */
+@media(max-width:768px){
+  #nav{padding:0 1rem}
+  .nav-search{display:none}
+  .hero{padding:3rem 1rem 2rem}
+  .section{padding:1.5rem 1rem}
+  .profile-header{margin-top:-40px}
+  .profile-info{padding:1rem}
+  .profile-name{font-size:1.5rem}
+  .profile-tabs{padding:0 1rem}
+  .profile-content{padding:1rem}
+  .dashboard{padding:1rem}
+  .form-row{grid-template-columns:1fr}
+  .onboard-box{padding:1.5rem}
+  .age-box{padding:1.5rem}
+  .age-inputs{gap:0.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== AGE GATE ===================== -->
+<div id="age-gate">
+  <div class="age-logo">Hand<span>Heaven</span></div>
+  <div class="age-tagline">The Premier Hand Content Marketplace</div>
+  <div class="age-box">
+    <h2>Verify Your Age</h2>
+    <p>This platform contains adult content. You must be 18 years or older to enter. Please confirm your date of birth.</p>
+    <div class="age-inputs">
+      <input type="number" id="age-month" placeholder="MM" min="1" max="12" maxlength="2">
+      <input type="number" id="age-day" placeholder="DD" min="1" max="31" maxlength="2">
+      <input type="number" id="age-year" placeholder="YYYY" min="1900" max="2007" maxlength="4">
+    </div>
+    <div class="age-check">
+      <input type="checkbox" id="age-terms">
+      <label for="age-terms">I confirm I am 18+ years old and agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. I understand this site contains adult content.</label>
+    </div>
+    <button class="btn btn-gold btn-full" onclick="verifyAge()">Enter HandHeaven</button>
+    <p class="age-warning">By entering you confirm you are of legal age in your jurisdiction to view adult content. HandHeaven complies with 18 U.S.C. § 2257.</p>
+  </div>
+</div>
+
+<!-- ===================== MAIN APP ===================== -->
+<div id="app">
+  <!-- Navigation -->
+  <nav id="nav">
+    <div class="nav-logo" onclick="navigate('home')" style="cursor:pointer">Hand<span>Heaven</span></div>
+    <div class="nav-search">
+      <span class="nav-search-icon">⌕</span>
+      <input type="text" placeholder="Search creators..." id="search-input" oninput="debounceSearch(this.value)">
+    </div>
+    <div class="nav-actions">
+      <div id="nav-guest" style="display:flex;gap:0.75rem">
+        <button class="btn btn-outline btn-sm" onclick="openAuth('login')">Sign In</button>
+        <button class="btn btn-gold btn-sm" onclick="openAuth('signup')">Join Free</button>
+      </div>
+      <div id="nav-user" class="nav-wrap" style="display:none">
+        <div class="nav-avatar" id="nav-avatar" onclick="toggleDropdown()"></div>
+        <div class="nav-dropdown" id="nav-dropdown">
+          <div class="nav-dropdown-header">
+            <strong id="dropdown-name">—</strong>
+            <p id="dropdown-role">—</p>
+          </div>
+          <a onclick="navigate('creator-dashboard');toggleDropdown()" id="dropdown-dashboard" style="display:none">My Dashboard</a>
+          <a onclick="navigate('buyer-dashboard');toggleDropdown()" id="dropdown-buyer" style="display:none">My Subscriptions</a>
+          <a onclick="navigate('settings');toggleDropdown()">Settings</a>
+          <button onclick="doLogout()">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== HOME PAGE ===== -->
+  <div class="page active" id="page-home">
+    <div class="hero">
+      <div class="hero-label">✦ The First Dedicated Hand Content Marketplace ✦</div>
+      <h1>Where Beautiful <em>Hands</em><br>Find Their Audience</h1>
+      <p>Discover, subscribe to, and support creators who specialize in hand content — nail art, elegant aesthetics, artistic expression. No face required.</p>
+      <div class="hero-actions">
+        <button class="btn btn-gold" onclick="openAuth('signup','creator')">Start Earning — It's Free</button>
+        <button class="btn btn-outline" onclick="scrollToCreators()">Discover Creators</button>
+      </div>
+      <div class="stats-bar">
+        <div class="stat-item"><div class="stat-num" id="stat-creators">—</div><div class="stat-label">Creators</div></div>
+        <div class="stat-item"><div class="stat-num">$0</div><div class="stat-label">Creator Sub Fee</div></div>
+        <div class="stat-item"><div class="stat-num">85%</div><div class="stat-label">Creator Revenue Share</div></div>
+        <div class="stat-item"><div class="stat-num">Weekly</div><div class="stat-label">Automatic Payouts</div></div>
+      </div>
+    </div>
+
+    <div class="section" id="creators-section">
+      <div class="section-header">
+        <h2>Featured Creators</h2>
+        <p id="creator-count">Loading...</p>
+      </div>
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterCreators('all',this)">All</button>
+        <button class="filter-btn" onclick="filterCreators('nail-art',this)">Nail Art</button>
+        <button class="filter-btn" onclick="filterCreators('jewelry',this)">Jewelry</button>
+        <button class="filter-btn" onclick="filterCreators('elegant',this)">Elegant</button>
+        <button class="filter-btn" onclick="filterCreators('nsfw',this)">18+</button>
+      </div>
+      <div class="creator-grid" id="creator-grid">
+        <div class="page-loader"><div class="loader"></div></div>
+      </div>
+    </div>
+
+    <!-- Become a Creator CTA -->
+    <div style="background:var(--bg3);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);padding:4rem 2rem;text-align:center;margin-top:2rem">
+      <div style="max-width:600px;margin:0 auto">
+        <div class="founder-badge">⭐ Founder Program — Limited Spots</div>
+        <h2 style="font-size:2rem;margin-bottom:1rem">Your Hands. Your Income.</h2>
+        <p style="color:var(--muted);margin-bottom:2rem;line-height:1.7">HandHeaven is the first marketplace built exclusively for hand content. No face needed. No body required. Just your hands — and we handle the rest. First 50 creators get lifetime free membership.</p>
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:2rem">
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.75rem;text-align:center">
+            <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold)">$0</div>
+            <div style="font-size:0.8rem;color:var(--muted)">Monthly Fee (Founders)</div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.75rem;text-align:center">
+            <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold)">85%</div>
+            <div style="font-size:0.8rem;color:var(--muted)">Revenue You Keep</div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.75rem;text-align:center">
+            <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold)">7 days</div>
+            <div style="font-size:0.8rem;color:var(--muted)">Payout Cycle</div>
+          </div>
+        </div>
+        <button class="btn btn-gold" onclick="openAuth('signup','creator')">Apply as Founding Creator</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CREATOR PROFILE PAGE ===== -->
+  <div class="page" id="page-profile">
+    <div id="profile-content">
+      <div class="page-loader"><div class="loader"></div></div>
+    </div>
+  </div>
+
+  <!-- ===== CREATOR DASHBOARD ===== -->
+  <div class="page" id="page-creator-dashboard">
+    <div class="dashboard">
+      <div class="dashboard-header">
+        <h1>Creator Dashboard</h1>
+        <p>Welcome back, <span id="dash-creator-name">—</span> ✦</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-label">Total Earnings</div>
+          <div class="stat-card-value gold" id="dash-earnings">$0.00</div>
+          <div class="stat-card-sub">All time</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Pending Payout</div>
+          <div class="stat-card-value" id="dash-pending">$0.00</div>
+          <div class="stat-card-sub">Next: this Friday</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Subscribers</div>
+          <div class="stat-card-value" id="dash-subs">0</div>
+          <div class="stat-card-sub">Active this month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Content Pieces</div>
+          <div class="stat-card-value" id="dash-content-count">0</div>
+          <div class="stat-card-sub">Published</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 340px;gap:1.5rem" class="dash-grid">
+        <!-- Content Management -->
+        <div>
+          <div class="dash-section">
+            <div class="dash-section-header">
+              <h2>My Content</h2>
+              <button class="btn btn-gold btn-sm" onclick="openUpload()">+ Upload</button>
+            </div>
+            <div class="content-list" id="dash-content-list">
+              <div class="page-loader"><div class="loader"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payout Panel -->
+        <div>
+          <div class="payout-card">
+            <div style="font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Available Balance</div>
+            <div class="payout-balance" id="payout-balance">$0.00</div>
+            <p class="payout-note">Payouts are processed every Friday via Paxum or bank transfer. Minimum payout: $20.00</p>
+            <button class="btn btn-outline btn-full btn-sm" id="request-payout-btn" onclick="requestPayout()">Request Payout</button>
+            <div class="payout-history">
+              <div style="font-size:0.82rem;color:var(--muted);margin-bottom:0.75rem">Recent Payouts</div>
+              <div id="payout-history-list">
+                <p style="font-size:0.82rem;color:var(--muted)">No payouts yet.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile Settings Quick -->
+          <div style="margin-top:1rem;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:1.25rem">
+            <div style="font-size:0.88rem;font-weight:500;margin-bottom:0.75rem">Your Profile</div>
+            <div style="font-size:0.82rem;color:var(--muted);margin-bottom:1rem">Your public profile is how buyers discover you.</div>
+            <button class="btn btn-outline btn-sm btn-full" onclick="navigate('profile',{username:state.profile?.username})">View Public Profile</button>
+          </div>
+
+          <!-- Founder Badge -->
+          <div id="founder-badge-card" style="margin-top:1rem;display:none;background:var(--gold-d);border:1px solid var(--gold-b);border-radius:var(--radius);padding:1.25rem;text-align:center">
+            <div style="color:var(--gold);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem">⭐ Founding Creator</div>
+            <div style="font-size:0.82rem;color:var(--muted)">Lifetime free membership. You're one of our first 50 creators.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== BUYER DASHBOARD ===== -->
+  <div class="page" id="page-buyer-dashboard">
+    <div class="dashboard">
+      <div class="dashboard-header">
+        <h1>My Subscriptions</h1>
+        <p>Content from creators you follow</p>
+      </div>
+      <div id="buyer-subs-list">
+        <div class="page-loader"><div class="loader"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ONBOARDING ===== -->
+  <div class="page" id="page-onboarding">
+    <div class="onboarding">
+      <div class="onboard-box">
+        <div class="step-indicator">
+          <div class="step-dot active" id="step-1"></div>
+          <div class="step-dot" id="step-2"></div>
+          <div class="step-dot" id="step-3"></div>
+          <div class="step-dot" id="step-4"></div>
+        </div>
+        <div id="onboard-step-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div style="margin-bottom:1rem">
+      <span style="font-family:'Playfair Display',serif;color:var(--gold)">HandHeaven</span>
+      <span style="margin:0 1rem;color:var(--border2)">|</span>
+      <a href="#">Terms of Service</a>
+      <span style="margin:0 0.75rem">·</span>
+      <a href="#">Privacy Policy</a>
+      <span style="margin:0 0.75rem">·</span>
+      <a href="#">2257 Compliance</a>
+      <span style="margin:0 0.75rem">·</span>
+      <a href="#">Content Guidelines</a>
+      <span style="margin:0 0.75rem">·</span>
+      <a href="mailto:hello@handheaven.com">Contact</a>
+    </div>
+    <p>© 2026 HandHeaven. All rights reserved. All models are 18+ years of age. 18 U.S.C. § 2257 records are maintained by HandHeaven LLC.</p>
+  </footer>
+</div>
+
+<!-- ===================== MODALS ===================== -->
+
+<!-- Auth Modal -->
+<div class="modal-overlay" id="modal-auth">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="auth-modal-title">Welcome to HandHeaven</h2>
+      <button class="modal-close" onclick="closeModal('modal-auth')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Sign In</button>
+        <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Create Account</button>
+      </div>
+
+      <!-- Login Form -->
+      <div id="form-login">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="login-email" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="login-password" placeholder="••••••••">
+        </div>
+        <div id="login-error" class="form-error" style="display:none"></div>
+        <button class="btn btn-gold btn-full" onclick="doLogin()">Sign In</button>
+      </div>
+
+      <!-- Signup Form -->
+      <div id="form-signup" style="display:none">
+        <div class="role-selector">
+          <div class="role-opt selected" id="role-creator" onclick="selectRole('creator')">
+            <div class="role-icon">✦</div>
+            <h4>Creator</h4>
+            <p>Sell your hand content & earn weekly</p>
+          </div>
+          <div class="role-opt" id="role-buyer" onclick="selectRole('buyer')">
+            <div class="role-icon">◈</div>
+            <h4>Buyer</h4>
+            <p>Subscribe to creators & access content</p>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="signup-email" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="signup-password" placeholder="Min. 8 characters">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <div class="input-prefix">
+            <span>handheaven.com/</span>
+            <input type="text" class="form-input" id="signup-username" placeholder="yourname">
+          </div>
+        </div>
+        <div class="age-check" style="margin-bottom:1.25rem">
+          <input type="checkbox" id="signup-terms">
+          <label for="signup-terms" style="font-size:0.8rem;color:var(--muted)">I am 18+ years old and agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+        </div>
+        <div id="signup-error" class="form-error" style="display:none"></div>
+        <button class="btn btn-gold btn-full" onclick="doSignup()">Create Account</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Content Modal -->
+<div class="modal-overlay" id="modal-upload">
+  <div class="modal modal-large">
+    <div class="modal-header">
+      <h2>Upload Content</h2>
+      <button class="modal-close" onclick="closeModal('modal-upload')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+        <input type="file" id="file-input" accept="image/*,video/*" multiple style="display:none" onchange="handleFileSelect(this.files)">
+        <div class="upload-zone-icon">◈</div>
+        <p><strong style="color:var(--white)">Click to upload</strong> or drag and drop</p>
+        <p style="font-size:0.78rem;margin-top:0.25rem">Photos and videos supported</p>
+      </div>
+      <div class="upload-preview" id="upload-preview"></div>
+      <div class="form-group">
+        <label class="form-label">Title *</label>
+        <input type="text" class="form-input" id="upload-title" placeholder="Give your content a title">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-input form-textarea" id="upload-description" placeholder="Describe your content..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Pricing</label>
+        <div class="price-toggle">
+          <div class="price-opt selected" id="price-free" onclick="selectPricing('free')">
+            <div>✦ Free Preview</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:0.25rem">Visible to all</div>
+          </div>
+          <div class="price-opt" id="price-sub" onclick="selectPricing('subscription')">
+            <div>◈ Subscribers Only</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:0.25rem">For your subscribers</div>
+          </div>
+          <div class="price-opt" id="price-paid" onclick="selectPricing('paid')">
+            <div>$ Pay Per View</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:0.25rem">Set a price</div>
+          </div>
+        </div>
+        <div id="price-input-wrap" style="display:none">
+          <div class="input-prefix">
+            <span>$</span>
+            <input type="number" class="form-input" id="upload-price" placeholder="9.99" min="1" step="0.01">
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="age-check">
+          <input type="checkbox" id="upload-nsfw">
+          <label for="upload-nsfw" style="font-size:0.82rem;color:var(--muted)">This content is NSFW / Adult (18+)</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tags (comma separated)</label>
+        <input type="text" class="form-input" id="upload-tags" placeholder="nail art, aesthetic, jewelry...">
+      </div>
+      <div id="upload-error" class="form-error" style="display:none"></div>
+      <div style="display:flex;gap:0.75rem;margin-top:1.5rem">
+        <button class="btn btn-outline" onclick="closeModal('modal-upload')">Cancel</button>
+        <button class="btn btn-gold" style="flex:1" onclick="doUpload()" id="upload-btn">Publish Content</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Content Viewer Modal -->
+<div class="modal-overlay" id="modal-content">
+  <div class="modal modal-large">
+    <div class="modal-header">
+      <h2 id="content-view-title">—</h2>
+      <button class="modal-close" onclick="closeModal('modal-content')">✕</button>
+    </div>
+    <div class="modal-body" id="content-view-body"></div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<script>
+const SUPABASE_URL = 'https://cjqggmzalhocfoxwfjpq.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNqcWdnbXphbGhvY2ZveHdmanBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MzAzMTEsImV4cCI6MjA5NDEwNjMxMX0.V4p9pDTjOAxzQim9DXebphi7U5_djKBxIlaOe8wQT8U';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+const state = {
+  user: null, profile: null, page: 'home',
+  creators: [], viewingCreator: null, viewingContent: [],
+  myContent: [], uploadFiles: [], selectedRole: 'creator',
+  pricingMode: 'free', currentStep: 1, searchTimer: null
+};
+
+async function init() {
+  if (!localStorage.getItem('hh_age')) { showEl('age-gate'); return; }
+  hideEl('age-gate');
+  const { data: { session } } = await db.auth.getSession();
+  if (session?.user) { state.user = session.user; await loadProfile(); }
+  showEl('app', 'block'); updateNav(); await navigate('home');
+  db.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      state.user = session.user; await loadProfile(); updateNav();
+    } else if (event === 'SIGNED_OUT') {
+      state.user = null; state.profile = null; updateNav();
+    }
+  });
+}
+
+function verifyAge() {
+  const m = +document.getElementById('age-month').value;
+  const d = +document.getElementById('age-day').value;
+  const y = +document.getElementById('age-year').value;
+  const terms = document.getElementById('age-terms').checked;
+  if (!m || !d || !y) return showToast('Please enter your date of birth', 'error');
+  if (!terms) return showToast('Please accept the terms to continue', 'error');
+  const birth = new Date(y, m-1, d);
+  const age = Math.floor((Date.now() - birth) / 31557600000);
+  if (age < 18 || y < 1900 || y > 2006) return showToast('You must be 18 or older to enter', 'error');
+  localStorage.setItem('hh_age', '1');
+  hideEl('age-gate');
+  showEl('app', 'block');
+  navigate('home');
+}
+
+async function navigate(page, params = {}) {
+  state.page = page;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('page-' + page);
+  if (el) el.classList.add('active');
+  window.scrollTo(0, 0);
+  if (page === 'home') await loadCreators();
+  else if (page === 'profile' && params.username) await loadCreatorProfile(params.username);
+  else if (page === 'creator-dashboard') await loadCreatorDashboard();
+  else if (page === 'buyer-dashboard') await loadBuyerDashboard();
+  else if (page === 'onboarding') showOnboardStep(1);
+}
+
+function updateNav() {
+  const u = state.user, p = state.profile;
+  if (u && p) {
+    showEl('nav-user', 'flex'); hideEl('nav-guest');
+    const av = document.getElementById('nav-avatar');
+    av.innerHTML = p.avatar_url ? `<img src="${p.avatar_url}">` : getInitials(p.display_name || p.username || u.email);
+    document.getElementById('dropdown-name').textContent = p.display_name || p.username || u.email.split('@')[0];
+    document.getElementById('dropdown-role').textContent = p.role === 'creator' ? 'Creator Account' : 'Buyer Account';
+    if (p.role === 'creator') { showEl('dropdown-dashboard'); hideEl('dropdown-buyer'); }
+    else { hideEl('dropdown-dashboard'); showEl('dropdown-buyer'); }
+  } else {
+    hideEl('nav-user'); showEl('nav-guest', 'flex');
+  }
+}
+
+function getInitials(name = '') {
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?';
+}
+
+function toggleDropdown() {
+  document.getElementById('nav-dropdown').classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.nav-wrap')) document.getElementById('nav-dropdown')?.classList.remove('open');
+});
+
+async function loadProfile() {
+  if (!state.user) return;
+  const { data } = await db.from('profiles').select('*').eq('id', state.user.id).single();
+  state.profile = data;
+}
+
+async function loadCreators(search = '') {
+  let q = db.from('profiles').select('*').eq('role', 'creator').eq('is_active', true).order('subscriber_count', { ascending: false });
+  if (search) q = q.ilike('display_name', `%${search}%`);
+  const { data } = await q;
+  state.creators = data || [];
+  const count = state.creators.length;
+  document.getElementById('creator-count').textContent = `${count} creator${count !== 1 ? 's' : ''}`;
+  document.getElementById('stat-creators').textContent = count || '—';
+  renderCreators(state.creators);
+}
+
+function renderCreators(creators) {
+  const grid = document.getElementById('creator-grid');
+  if (!creators.length) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">◈</div><h3>No creators yet</h3><p>Be the first to join HandHeaven</p><button class="btn btn-gold" style="margin-top:1rem" onclick="openAuth('signup','creator')">Join as Creator</button></div>`;
+    return;
+  }
+  grid.innerHTML = creators.map(c => `
+    <div class="creator-card" onclick="navigate('profile',{username:'${c.username || c.id}'})">
+      <div class="creator-cover">
+        ${c.cover_url ? `<img src="${c.cover_url}" alt="">` : '<div class="creator-cover-placeholder">✦</div>'}
+        <div class="creator-avatar">${c.avatar_url ? `<img src="${c.avatar_url}">` : getInitials(c.display_name)}</div>
+      </div>
+      <div class="creator-card-body">
+        <div class="creator-name">${c.display_name || c.username || 'Creator'} ${c.is_verified ? '<span class="verified-badge">✦</span>' : ''}</div>
+        ${c.bio ? `<div class="creator-bio">${c.bio}</div>` : ''}
+        ${c.tags?.length ? `<div class="creator-tags">${c.tags.slice(0,3).map(t => `<span class="tag">${t}</span>`).join('')}</div>` : ''}
+        <div class="creator-meta">
+          <div class="creator-price">${c.subscription_price ? `$${parseFloat(c.subscription_price).toFixed(2)}<span>/month</span>` : '<span>Free preview</span>'}</div>
+          <div class="creator-subs">${c.subscriber_count || 0} subscribers</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterCreators(tag, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (tag === 'all') { renderCreators(state.creators); return; }
+  renderCreators(state.creators.filter(c => c.tags?.includes(tag) || (tag === 'nsfw' && c.tags?.includes('nsfw'))));
+}
+
+function debounceSearch(val) {
+  clearTimeout(state.searchTimer);
+  state.searchTimer = setTimeout(() => loadCreators(val), 400);
+}
+
+function scrollToCreators() {
+  document.getElementById('creators-section')?.scrollIntoView({ behavior: 'smooth' });
+}
+
+async function loadCreatorProfile(usernameOrId) {
+  const container = document.getElementById('profile-content');
+  container.innerHTML = '<div class="page-loader"><div class="loader"></div></div>';
+  let q = db.from('profiles').select('*');
+  q = usernameOrId.includes('-') && usernameOrId.length === 36 ? q.eq('id', usernameOrId) : q.eq('username', usernameOrId);
+  const { data: creator } = await q.single();
+  if (!creator) { container.innerHTML = '<div class="empty"><h3>Creator not found</h3></div>'; return; }
+  state.viewingCreator = creator;
+  const { data: content } = await db.from('content').select('*').eq('creator_id', creator.id).eq('is_published', true).order('created_at', { ascending: false });
+  state.viewingContent = content || [];
+  const isMine = state.user?.id === creator.id;
+  const isSubscribed = false;
+  container.innerHTML = `
+    <div class="profile-cover">
+      ${creator.cover_url ? `<img src="${creator.cover_url}">` : ''}
+      <div class="profile-cover-overlay"></div>
+    </div>
+    <div class="profile-header">
+      <div style="display:flex;align-items:flex-end;gap:1.25rem">
+        <div class="profile-avatar">${creator.avatar_url ? `<img src="${creator.avatar_url}">` : getInitials(creator.display_name)}</div>
+        <div style="padding-bottom:0.5rem">
+          <div class="profile-name">${creator.display_name || creator.username || 'Creator'} ${creator.is_verified ? '<span class="verified-badge" title="Verified">✦</span>' : ''}</div>
+          <div class="profile-username">@${creator.username || 'creator'}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.75rem;padding-bottom:0.5rem">
+        ${isMine ? `<button class="btn btn-outline btn-sm" onclick="navigate('creator-dashboard')">Dashboard</button>` :
+          isSubscribed ? `<button class="btn btn-outline btn-sm">Subscribed ✓</button>` :
+          `<button class="btn btn-gold btn-sm" onclick="subscribe('${creator.id}')">Subscribe $${parseFloat(creator.subscription_price || 9.99).toFixed(2)}/mo</button>`}
+      </div>
+    </div>
+    <div class="profile-info">
+      ${creator.bio ? `<div class="profile-bio">${creator.bio}</div>` : ''}
+      <div class="profile-stats">
+        <div class="profile-stat"><strong>${state.viewingContent.length}</strong><span>Posts</span></div>
+        <div class="profile-stat"><strong>${creator.subscriber_count || 0}</strong><span>Subscribers</span></div>
+        <div class="profile-stat"><strong>$${parseFloat(creator.subscription_price || 9.99).toFixed(2)}</strong><span>Monthly</span></div>
+      </div>
+      ${creator.tags?.length ? `<div class="creator-tags">${creator.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>` : ''}
+    </div>
+    <div class="profile-tabs">
+      <button class="profile-tab active">Content (${state.viewingContent.length})</button>
+      <button class="profile-tab">About</button>
+    </div>
+    <div class="profile-content">
+      ${!state.viewingContent.length ? `<div class="empty"><div class="empty-icon">◈</div><h3>No content yet</h3><p>This creator hasn't posted yet</p></div>` :
+        `<div class="content-grid">${state.viewingContent.map(c => renderContentItem(c, isSubscribed, isMine)).join('')}</div>`}
+    </div>
+    ${!isMine && !isSubscribed ? `
+    <div style="display:flex;justify-content:center">
+      <div class="sub-card">
+        <h3>Subscribe to ${creator.display_name || 'this creator'}</h3>
+        <p>Get unlimited access to all content and new posts</p>
+        <div class="sub-price">$${parseFloat(creator.subscription_price || 9.99).toFixed(2)}<sub>/month</sub></div>
+        <ul class="sub-features">
+          <li>Unlimited access to all content</li>
+          <li>New posts as they're published</li>
+          <li>Direct message the creator</li>
+          <li>Cancel anytime</li>
+        </ul>
+        <button class="btn btn-gold btn-full" onclick="subscribe('${creator.id}')">Subscribe Now</button>
+      </div>
+    </div>` : ''}
+  `;
+}
+
+function renderContentItem(c, isSubscribed, isMine) {
+  const locked = !c.is_free && !isSubscribed && !isMine;
+  return `
+    <div class="content-item" onclick="viewContent('${c.id}')">
+      <div class="content-thumb">
+        ${c.thumbnail_url ? `<img src="${c.thumbnail_url}" alt="${c.title}">` :
+          `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:2rem">◈</div>`}
+        ${locked ? `<div class="content-lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span>${c.price ? `$${parseFloat(c.price).toFixed(2)}` : 'Subscribe'}</span></div>` : ''}
+      </div>
+      <div class="content-item-info">
+        <div class="content-item-title">${c.title}</div>
+        <div class="content-item-price">${c.is_free ? 'Free' : c.price ? `$${parseFloat(c.price).toFixed(2)}` : 'Subscribers only'}</div>
+      </div>
+    </div>
+  `;
+}
+
+function viewContent(contentId) {
+  const c = state.viewingContent.find(x => x.id === contentId);
+  if (!c) return;
+  const locked = !c.is_free && state.viewingCreator?.id !== state.user?.id;
+  document.getElementById('content-view-title').textContent = c.title;
+  const body = document.getElementById('content-view-body');
+  if (locked) {
+    body.innerHTML = `
+      <div style="text-align:center;padding:2rem">
+        <div style="font-size:3rem;margin-bottom:1rem;opacity:0.3">◈</div>
+        <h3 style="margin-bottom:0.5rem">Premium Content</h3>
+        <p style="color:var(--muted);margin-bottom:1.5rem">${c.price ? `Purchase for $${parseFloat(c.price).toFixed(2)}` : 'Subscribe to access this content'}</p>
+        ${c.price ? `<button class="btn btn-gold" onclick="purchaseContent('${c.id}')">Buy for $${parseFloat(c.price).toFixed(2)}</button>` :
+          `<button class="btn btn-gold" onclick="subscribe('${state.viewingCreator?.id}');closeModal('modal-content')">Subscribe $${parseFloat(state.viewingCreator?.subscription_price || 9.99).toFixed(2)}/mo</button>`}
+      </div>`;
+  } else {
+    body.innerHTML = c.description ? `<p style="color:var(--muted);margin-bottom:1.5rem">${c.description}</p>` : '';
+    if (c.thumbnail_url) body.innerHTML += `<img src="${c.thumbnail_url}" style="width:100%;border-radius:var(--radius-s)">`;
+  }
+  openModal('modal-content');
+}
+
+function subscribe(creatorId) {
+  if (!state.user) return openAuth('signup', 'buyer');
+  showToast('Payment processing coming soon. CCBill integration in progress.', 'success');
+}
+
+function purchaseContent(contentId) {
+  if (!state.user) return openAuth('signup', 'buyer');
+  showToast('Payment processing coming soon. CCBill integration in progress.', 'success');
+}
+
+async function loadCreatorDashboard() {
+  if (!state.user || !state.profile) return;
+  document.getElementById('dash-creator-name').textContent = state.profile.display_name || state.profile.username || '—';
+  document.getElementById('dash-earnings').textContent = `$${parseFloat(state.profile.total_earnings || 0).toFixed(2)}`;
+  document.getElementById('dash-pending').textContent = `$${parseFloat(state.profile.pending_payout || 0).toFixed(2)}`;
+  document.getElementById('dash-subs').textContent = state.profile.subscriber_count || 0;
+  document.getElementById('payout-balance').textContent = `$${parseFloat(state.profile.pending_payout || 0).toFixed(2)}`;
+  if (state.profile.founder_tier) document.getElementById('founder-badge-card').style.display = 'block';
+  const { data: content } = await db.from('content').select('*').eq('creator_id', state.user.id).order('created_at', { ascending: false });
+  state.myContent = content || [];
+  document.getElementById('dash-content-count').textContent = state.myContent.filter(c => c.is_published).length;
+  renderDashContent();
+}
+
+function renderDashContent() {
+  const list = document.getElementById('dash-content-list');
+  if (!state.myContent.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">◈</div><h3>No content yet</h3><p>Upload your first piece of content</p><button class="btn btn-gold btn-sm" style="margin-top:1rem" onclick="openUpload()">Upload Now</button></div>`;
+    return;
+  }
+  list.innerHTML = state.myContent.map(c => `
+    <div class="content-row">
+      <div class="content-row-thumb">
+        ${c.thumbnail_url ? `<img src="${c.thumbnail_url}">` : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted)">◈</div>`}
+      </div>
+      <div class="content-row-info">
+        <div class="content-row-title">${c.title}</div>
+        <div class="content-row-meta">${c.is_free ? 'Free' : c.price ? `$${parseFloat(c.price).toFixed(2)} PPV` : 'Subscribers only'} · ${c.view_count || 0} views · ${timeAgo(c.created_at)}</div>
+      </div>
+      <div class="content-row-actions">
+        <button class="btn btn-outline btn-sm" onclick="deleteContent('${c.id}')">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function loadBuyerDashboard() {
+  if (!state.user) return;
+  const { data: subs } = await db.from('subscriptions').select('*, profiles!creator_id(*)').eq('buyer_id', state.user.id).eq('status', 'active');
+  const list = document.getElementById('buyer-subs-list');
+  if (!subs?.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">◈</div><h3>No subscriptions yet</h3><p>Discover creators and subscribe to access their content</p><button class="btn btn-gold" style="margin-top:1rem" onclick="navigate('home')">Find Creators</button></div>`;
+    return;
+  }
+  list.innerHTML = `<div class="creator-grid">${subs.map(s => {
+    const c = s.profiles;
+    return `<div class="creator-card" onclick="navigate('profile',{username:'${c.username || c.id}'})">${c.display_name || 'Creator'}</div>`;
+  }).join('')}</div>`;
+}
+
+function requestPayout() {
+  const bal = parseFloat(state.profile?.pending_payout || 0);
+  if (bal < 20) return showToast('Minimum payout is $20.00', 'error');
+  showToast('Payout request submitted. Processing within 24-48 hours via Paxum.', 'success');
+}
+
+async function deleteContent(id) {
+  if (!confirm('Delete this content?')) return;
+  await db.from('content').delete().eq('id', id);
+  state.myContent = state.myContent.filter(c => c.id !== id);
+  renderDashContent();
+  document.getElementById('dash-content-count').textContent = state.myContent.filter(c => c.is_published).length;
+  showToast('Content deleted', 'success');
+}
+
+function openAuth(tab = 'login', role = null) {
+  if (role) { state.selectedRole = role; selectRole(role); }
+  switchAuthTab(tab);
+  openModal('modal-auth');
+}
+
+function switchAuthTab(tab) {
+  document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('form-signup').style.display = tab === 'signup' ? 'block' : 'none';
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+}
+
+function selectRole(role) {
+  state.selectedRole = role;
+  document.getElementById('role-creator').classList.toggle('selected', role === 'creator');
+  document.getElementById('role-buyer').classList.toggle('selected', role === 'buyer');
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pw = document.getElementById('login-password').value;
+  const err = document.getElementById('login-error');
+  err.style.display = 'none';
+  if (!email || !pw) { err.textContent = 'Please enter email and password'; err.style.display = 'block'; return; }
+  try {
+    const { data, error } = await db.auth.signInWithPassword({ email, password: pw });
+    if (error) throw error;
+    state.user = data.user;
+    await loadProfile();
+    closeModal('modal-auth');
+    updateNav();
+    showToast('Welcome back! ✦', 'success');
+    if (state.profile?.role === 'creator') navigate('creator-dashboard');
+    else navigate('buyer-dashboard');
+  } catch(e) {
+    err.textContent = e.message || 'Invalid email or password';
+    err.style.display = 'block';
+  }
+}
+
+async function doSignup() {
+  const email = document.getElementById('signup-email').value.trim();
+  const pw = document.getElementById('signup-password').value;
+  const username = document.getElementById('signup-username').value.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+  const terms = document.getElementById('signup-terms').checked;
+  const err = document.getElementById('signup-error');
+  err.style.display = 'none';
+  if (!email || !pw || !username) { err.textContent = 'Please fill all fields'; err.style.display = 'block'; return; }
+  if (pw.length < 8) { err.textContent = 'Password must be at least 8 characters'; err.style.display = 'block'; return; }
+  if (!terms) { err.textContent = 'Please accept the terms of service'; err.style.display = 'block'; return; }
+  try {
+    const { data, error } = await db.auth.signUp({ email, password: pw, options: { data: { role: state.selectedRole } } });
+    if (error) throw error;
+    if (data.user) {
+      await db.from('profiles').upsert({ id: data.user.id, role: state.selectedRole, username, display_name: username });
+      state.user = data.user;
+      await loadProfile();
+      closeModal('modal-auth');
+      updateNav();
+      showToast('Account created! Welcome to HandHeaven ✦', 'success');
+      if (state.selectedRole === 'creator') navigate('onboarding');
+      else navigate('buyer-dashboard');
+    } else {
+      showToast('Check your email to confirm your account', 'success');
+      closeModal('modal-auth');
+    }
+  } catch(e) {
+    err.textContent = e.message || 'Failed to create account';
+    err.style.display = 'block';
+  }
+}
+
+async function doLogout() {
+  await db.auth.signOut();
+  state.user = null; state.profile = null;
+  updateNav(); navigate('home');
+  showToast('Signed out successfully', 'success');
+}
+
+function showOnboardStep(step) {
+  state.currentStep = step;
+  [1,2,3,4].forEach(i => {
+    const dot = document.getElementById('step-' + i);
+    if (dot) {
+      dot.className = 'step-dot' + (i < step ? ' done' : i === step ? ' active' : '');
+    }
+  });
+  const content = document.getElementById('onboard-step-content');
+  const steps = {
+    1: `
+      <h2>Build Your Profile</h2>
+      <p>This is how buyers will discover you on HandHeaven.</p>
+      <div class="founder-badge">⭐ Founding Creator — Free Forever</div>
+      <div class="form-group">
+        <label class="form-label">Display Name *</label>
+        <input type="text" class="form-input" id="ob-name" placeholder="How you'll appear to buyers">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bio</label>
+        <textarea class="form-input form-textarea" id="ob-bio" placeholder="Tell buyers what makes your hands unique..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tags (helps buyers find you)</label>
+        <input type="text" class="form-input" id="ob-tags" placeholder="nail art, jewelry, elegant, aesthetic...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Location (optional)</label>
+        <input type="text" class="form-input" id="ob-location" placeholder="City, Country">
+      </div>
+      <button class="btn btn-gold btn-full" onclick="onboardStep2()">Continue →</button>`,
+    2: `
+      <h2>Set Your Pricing</h2>
+      <p>Choose your monthly subscription price. You can change this anytime.</p>
+      <div class="form-group">
+        <label class="form-label">Monthly Subscription Price</label>
+        <div class="input-prefix">
+          <span>$</span>
+          <input type="number" class="form-input" id="ob-price" value="9.99" min="3" max="50" step="0.01">
+        </div>
+        <p class="form-hint">You keep 85% of every subscription. HandHeaven keeps 15%.</p>
+      </div>
+      <div style="background:var(--gold-d);border:1px solid var(--gold-b);border-radius:var(--radius-s);padding:1rem;margin-bottom:1.5rem">
+        <div style="font-size:0.82rem;color:var(--gold);margin-bottom:0.5rem">Example earnings with 10 subscribers:</div>
+        <div id="earnings-preview" style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--white)">$84.91/month</div>
+        <div style="font-size:0.75rem;color:var(--muted);margin-top:0.25rem">after 15% platform fee</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Payout Method</label>
+        <select class="form-input form-select" id="ob-payout">
+          <option value="paxum">Paxum (recommended)</option>
+          <option value="bank">Bank Transfer</option>
+        </select>
+        <p class="form-hint">Payouts every Friday. Minimum $20.</p>
+      </div>
+      <div style="display:flex;gap:0.75rem">
+        <button class="btn btn-outline" onclick="showOnboardStep(1)">Back</button>
+        <button class="btn btn-gold" style="flex:1" onclick="onboardStep3()">Continue →</button>
+      </div>`,
+    3: `
+      <h2>Legal Verification</h2>
+      <p>Required by law (18 U.S.C. § 2257) for all content creators.</p>
+      <div class="form-group">
+        <label class="form-label">Legal Full Name *</label>
+        <input type="text" class="form-input" id="ob-legal-name" placeholder="Your legal name as on ID">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date of Birth *</label>
+        <input type="date" class="form-input" id="ob-dob">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ID Document Type</label>
+        <select class="form-input form-select" id="ob-doc-type">
+          <option value="passport">Passport</option>
+          <option value="drivers_license">Driver's License</option>
+          <option value="national_id">National ID</option>
+        </select>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-s);padding:1rem;margin-bottom:1.5rem;font-size:0.82rem;color:var(--muted);line-height:1.6">
+        ⚠ Your information is encrypted and stored securely. It is only used for legal compliance and is never shared with buyers or third parties.
+      </div>
+      <div style="display:flex;gap:0.75rem">
+        <button class="btn btn-outline" onclick="showOnboardStep(2)">Back</button>
+        <button class="btn btn-gold" style="flex:1" onclick="onboardStep4()">Verify & Continue →</button>
+      </div>`,
+    4: `
+      <div style="text-align:center;padding:1rem 0">
+        <div style="font-size:3rem;margin-bottom:1rem">✦</div>
+        <h2>You're Live on HandHeaven</h2>
+        <p style="margin-bottom:2rem">Your creator profile is ready. Start uploading content and share your profile link to start earning.</p>
+        <div style="background:var(--gold-d);border:1px solid var(--gold-b);border-radius:var(--radius-s);padding:1rem;margin-bottom:1.5rem;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--gold);word-break:break-all">
+          handheaven.com/${state.profile?.username || 'your-username'}
+        </div>
+        <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-gold" onclick="navigate('creator-dashboard')">Go to Dashboard</button>
+          <button class="btn btn-outline" onclick="openUpload()">Upload First Content</button>
+        </div>
+      </div>`
+  };
+  content.innerHTML = steps[step] || '';
+  if (step === 2) {
+    document.getElementById('ob-price')?.addEventListener('input', e => {
+      const v = parseFloat(e.target.value) || 0;
+      document.getElementById('earnings-preview').textContent = `$${(v * 10 * 0.85).toFixed(2)}/month`;
+    });
+  }
+}
+
+async function onboardStep2() {
+  const name = document.getElementById('ob-name')?.value.trim();
+  if (!name) return showToast('Please enter a display name', 'error');
+  const tags = document.getElementById('ob-tags')?.value.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+  await db.from('profiles').update({
+    display_name: name, bio: document.getElementById('ob-bio')?.value.trim(),
+    tags, location: document.getElementById('ob-location')?.value.trim()
+  }).eq('id', state.user.id);
+  await loadProfile();
+  showOnboardStep(2);
+}
+
+async function onboardStep3() {
+  const price = parseFloat(document.getElementById('ob-price')?.value) || 9.99;
+  const payout = document.getElementById('ob-payout')?.value;
+  await db.from('profiles').update({ subscription_price: price, social_links: { payout_method: payout } }).eq('id', state.user.id);
+  await loadProfile();
+  showOnboardStep(3);
+}
+
+async function onboardStep4() {
+  const name = document.getElementById('ob-legal-name')?.value.trim();
+  const dob = document.getElementById('ob-dob')?.value;
+  if (!name || !dob) return showToast('Please fill in all required fields', 'error');
+  const birthDate = new Date(dob);
+  const age = Math.floor((Date.now() - birthDate) / 31557600000);
+  if (age < 18) return showToast('You must be 18 or older to create content', 'error');
+  await db.from('compliance_records').upsert({ creator_id: state.user.id, legal_name: name, birth_date: dob, document_type: document.getElementById('ob-doc-type')?.value });
+  await db.from('profiles').update({ age_verified: true, age_verified_at: new Date().toISOString() }).eq('id', state.user.id);
+  await loadProfile();
+  showOnboardStep(4);
+}
+
+function openUpload() {
+  if (!state.user) return openAuth('signup', 'creator');
+  state.uploadFiles = [];
+  document.getElementById('upload-preview').innerHTML = '';
+  document.getElementById('upload-title').value = '';
+  document.getElementById('upload-description').value = '';
+  document.getElementById('upload-tags').value = '';
+  document.getElementById('upload-nsfw').checked = false;
+  selectPricing('free');
+  openModal('modal-upload');
+}
+
+function handleFileSelect(files) {
+  state.uploadFiles = Array.from(files);
+  const preview = document.getElementById('upload-preview');
+  preview.innerHTML = state.uploadFiles.map((f, i) => {
+    const url = URL.createObjectURL(f);
+    return `<div class="upload-preview-item"><img src="${url}" style="width:100%;height:100%;object-fit:cover"></div>`;
+  }).join('');
+}
+
+function handleDragOver(e) { e.preventDefault(); document.getElementById('upload-zone').classList.add('drag'); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('drag');
+  handleFileSelect(e.dataTransfer.files);
+}
+
+function selectPricing(mode) {
+  state.pricingMode = mode;
+  ['free','sub','paid'].forEach(m => document.getElementById('price-' + m)?.classList.remove('selected'));
+  document.getElementById('price-' + mode)?.classList.add('selected');
+  document.getElementById('price-input-wrap').style.display = mode === 'paid' ? 'block' : 'none';
+}
+
+async function doUpload() {
+  const title = document.getElementById('upload-title').value.trim();
+  const description = document.getElementById('upload-description').value.trim();
+  const tags = document.getElementById('upload-tags').value.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+  const isNsfw = document.getElementById('upload-nsfw').checked;
+  const price = state.pricingMode === 'paid' ? parseFloat(document.getElementById('upload-price').value) : null;
+  const isFree = state.pricingMode === 'free';
+  const err = document.getElementById('upload-error');
+  err.style.display = 'none';
+  if (!title) { err.textContent = 'Please add a title'; err.style.display = 'block'; return; }
+  if (!state.uploadFiles.length) { err.textContent = 'Please select at least one file'; err.style.display = 'block'; return; }
+  const btn = document.getElementById('upload-btn');
+  btn.textContent = 'Uploading...'; btn.disabled = true;
+  try {
+    const file = state.uploadFiles[0];
+    const ext = file.name.split('.').pop();
+    const filePath = `${state.user.id}/${Date.now()}.${ext}`;
+    const { error: uploadErr } = await db.storage.from('content').upload(filePath, file);
+    if (uploadErr) throw uploadErr;
+    let thumbUrl = null;
+    if (file.type.startsWith('image/')) {
+      const thumbPath = `${state.user.id}/${Date.now()}-thumb.${ext}`;
+      await db.storage.from('thumbnails').upload(thumbPath, file);
+      const { data } = db.storage.from('thumbnails').getPublicUrl(thumbPath);
+      thumbUrl = data?.publicUrl;
+    }
+    await db.from('content').insert({
+      creator_id: state.user.id, title, description,
+      content_type: file.type.startsWith('video/') ? 'video' : 'photo',
+      is_free: isFree, price, is_nsfw: isNsfw,
+      thumbnail_url: thumbUrl, file_urls: [filePath], tags, is_published: true
+    });
+    closeModal('modal-upload');
+    showToast('Content published! ✦', 'success');
+    await loadCreatorDashboard();
+  } catch(e) {
+    err.textContent = e.message || 'Upload failed';
+    err.style.display = 'block';
+  } finally {
+    btn.textContent = 'Publish Content'; btn.disabled = false;
+  }
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+function showEl(id, display = 'block') { const el = document.getElementById(id); if (el) el.style.display = display; }
+function hideEl(id) { const el = document.getElementById(id); if (el) el.style.display = 'none'; }
+
+function showToast(msg, type = 'success') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<div class="toast-dot"></div><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr);
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+});
+
+init();
+</script>
+</body>
+</html>
