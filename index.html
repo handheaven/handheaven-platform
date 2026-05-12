@@ -1221,7 +1221,15 @@ async function doLogin() {
   if (!email || !pw) { err.textContent = 'Please enter email and password'; err.style.display = 'block'; return; }
   try {
     const { data, error } = await db.auth.signInWithPassword({ email, password: pw });
-    if (error) throw error;
+    if (error) {
+      if (error.message.includes('Email not confirmed')) {
+        err.innerHTML = 'Please confirm your email first. <a href="#" onclick="resendConfirmation(\'' + email + '\');return false" style="color:var(--gold)">Resend confirmation</a>';
+      } else {
+        err.textContent = error.message || 'Invalid email or password';
+      }
+      err.style.display = 'block';
+      return;
+    }
     state.user = data.user;
     await loadProfile();
     closeModal('modal-auth');
@@ -1246,25 +1254,50 @@ async function doSignup() {
   if (pw.length < 8) { err.textContent = 'Password must be at least 8 characters'; err.style.display = 'block'; return; }
   if (!terms) { err.textContent = 'Please accept the terms of service'; err.style.display = 'block'; return; }
   try {
-    const { data, error } = await db.auth.signUp({ email, password: pw, options: { data: { role: state.selectedRole } } });
+    const { data, error } = await db.auth.signUp({
+      email, password: pw,
+      options: {
+        data: { role: state.selectedRole },
+        emailRedirectTo: 'https://handheaven.com'
+      }
+    });
     if (error) throw error;
     if (data.user) {
       await db.from('profiles').upsert({ id: data.user.id, role: state.selectedRole, username, display_name: username });
-      state.user = data.user;
-      await loadProfile();
-      closeModal('modal-auth');
-      updateNav();
-      showToast('Account created! Welcome to HandHeaven ✦', 'success');
-      if (state.selectedRole === 'creator') navigate('onboarding');
-      else navigate('buyer-dashboard');
-    } else {
-      showToast('Check your email to confirm your account', 'success');
-      closeModal('modal-auth');
     }
+    closeModal('modal-auth');
+    showEmailConfirmBanner(email);
   } catch(e) {
     err.textContent = e.message || 'Failed to create account';
     err.style.display = 'block';
   }
+}
+
+function showEmailConfirmBanner(email) {
+  const existing = document.getElementById('email-confirm-banner');
+  if (existing) existing.remove();
+  const banner = document.createElement('div');
+  banner.id = 'email-confirm-banner';
+  banner.style.cssText = `position:fixed;top:64px;left:0;right:0;z-index:999;background:#1C1B1A;border-bottom:1px solid rgba(201,145,61,0.3);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap`;
+  banner.innerHTML = `
+    <div style="display:flex;align-items:center;gap:0.75rem">
+      <span style="color:var(--gold);font-size:1.1rem">✦</span>
+      <div>
+        <div style="font-size:0.9rem;color:#F5F0E8;font-weight:500">Check your email to confirm your account</div>
+        <div style="font-size:0.8rem;color:#8A8580">We sent a confirmation link to <strong style="color:#F5F0E8">${email}</strong> — click it to activate your account.</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:0.75rem;align-items:center">
+      <button onclick="resendConfirmation('${email}')" style="background:transparent;border:1px solid rgba(201,145,61,0.3);color:#C9913D;padding:6px 14px;border-radius:6px;font-size:0.8rem;cursor:pointer;font-family:inherit">Resend email</button>
+      <button onclick="document.getElementById('email-confirm-banner').remove()" style="background:transparent;border:none;color:#8A8580;font-size:1.1rem;cursor:pointer;padding:0 4px">✕</button>
+    </div>
+  `;
+  document.body.appendChild(banner);
+}
+
+async function resendConfirmation(email) {
+  await db.auth.resend({ type: 'signup', email });
+  showToast('Confirmation email resent. Check your inbox.', 'success');
 }
 
 async function doLogout() {
