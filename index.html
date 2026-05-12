@@ -40,14 +40,11 @@ img{max-width:100%;display:block}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
 /* ---- AGE GATE ---- */
-#age-gate{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.5rem;overflow-y:auto}
+#age-gate{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:2rem;text-align:center}
 #age-gate.hidden{display:none}
-.age-gate-inner{display:flex;flex-direction:column;align-items:center;text-align:center;width:100%;max-width:480px;margin:auto}
 .age-logo{font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold);letter-spacing:0.08em;margin-bottom:0.5rem}
-.age-tagline{color:var(--muted);font-size:0.85rem;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:2.5rem}
-.age-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;width:100%}
-.age-box h2{font-size:1.6rem;margin-bottom:1rem}
-.age-box p{color:var(--muted);font-size:0.9rem;margin-bottom:2rem;line-height:1.7}
+.age-tagline{color:var(--muted);font-size:0.85rem;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:3rem}
+.age-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem 3rem;max-width:480px;width:100%}
 .age-box h2{font-size:1.6rem;margin-bottom:1rem}
 .age-box p{color:var(--muted);font-size:0.9rem;margin-bottom:2rem;line-height:1.7}
 .age-inputs{display:flex;gap:0.75rem;margin-bottom:1.5rem;justify-content:center}
@@ -329,7 +326,6 @@ footer a:hover{color:var(--gold)}
 
 <!-- ===================== AGE GATE ===================== -->
 <div id="age-gate">
-  <div class="age-gate-inner">
   <div class="age-logo">Hand<span>Heaven</span></div>
   <div class="age-tagline">The Premier Hand Content Marketplace</div>
   <div class="age-box">
@@ -347,14 +343,13 @@ footer a:hover{color:var(--gold)}
     <button class="btn btn-gold btn-full" onclick="verifyAge()">Enter HandHeaven</button>
     <p class="age-warning">By entering you confirm you are of legal age in your jurisdiction to view adult content. HandHeaven complies with 18 U.S.C. § 2257.</p>
   </div>
-  </div>
 </div>
 
 <!-- ===================== MAIN APP ===================== -->
 <div id="app">
   <!-- Navigation -->
   <nav id="nav">
-    <div class="nav-logo" onclick="navigate('home')" style="cursor:pointer"><span style="color:var(--white);font-style:normal">Hand</span><span style="color:var(--gold);font-style:italic">Heaven</span></div>
+    <div class="nav-logo" onclick="navigate('home')" style="cursor:pointer">Hand<span>Heaven</span></div>
     <div class="nav-search">
       <span class="nav-search-icon">⌕</span>
       <input type="text" placeholder="Search creators..." id="search-input" oninput="debounceSearch(this.value)">
@@ -391,7 +386,8 @@ footer a:hover{color:var(--gold)}
         <button class="btn btn-outline" onclick="scrollToCreators()">Discover Creators</button>
       </div>
       <div class="stats-bar">
-        <div class="stat-item"><div class="stat-num">$0</div><div class="stat-label">For Founders<br>Monthly Subscription</div></div>
+        <div class="stat-item"><div class="stat-num" id="stat-creators">—</div><div class="stat-label">Creators</div></div>
+        <div class="stat-item"><div class="stat-num">$0</div><div class="stat-label">Creator Sub Fee</div></div>
         <div class="stat-item"><div class="stat-num">85%</div><div class="stat-label">Creator Revenue Share</div></div>
         <div class="stat-item"><div class="stat-num">Weekly</div><div class="stat-label">Automatic Payouts</div></div>
       </div>
@@ -414,76 +410,27 @@ footer a:hover{color:var(--gold)}
       </div>
     </div>
 
-    <!-- Your Hands. Your Income. — Founder Program -->
-    <div style="background:var(--bg3);border-top:1px solid var(--border2);padding:4rem 2rem;text-align:center">
-      <div style="max-width:680px;margin:0 auto">
+    <!-- Become a Creator CTA -->
+    <div style="background:var(--bg3);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);padding:4rem 2rem;text-align:center;margin-top:2rem">
+      <div style="max-width:600px;margin:0 auto">
         <div class="founder-badge">⭐ Founder Program — Limited Spots</div>
         <h2 style="font-size:2rem;margin-bottom:1rem">Your Hands. Your Income.</h2>
-        <p style="color:var(--muted);margin-bottom:2.5rem;line-height:1.8;max-width:520px;margin-left:auto;margin-right:auto">HandHeaven is the first marketplace built exclusively for hand content. No face needed. No body required. Just your hands — and we handle the rest. First 50 creators get lifetime free membership.</p>
-
-        <!-- Live counter -->
-        <div style="max-width:480px;margin:0 auto 2.5rem">
-          <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:0.75rem">Founding spots claimed</div>
-          <div style="background:var(--bg2);border-radius:30px;height:8px;overflow:hidden;border:1px solid var(--border2);margin-bottom:0.6rem">
-            <div id="founder-bar" style="height:100%;border-radius:30px;background:var(--gold);transition:width 1s ease;width:0%"></div>
+        <p style="color:var(--muted);margin-bottom:2rem;line-height:1.7">HandHeaven is the first marketplace built exclusively for hand content. No face needed. No body required. Just your hands — and we handle the rest. First 50 creators get lifetime free membership.</p>
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:2rem">
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.75rem;text-align:center">
+            <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold)">$0</div>
+            <div style="font-size:0.8rem;color:var(--muted)">Monthly Fee (Founders)</div>
           </div>
-          <div style="display:flex;justify-content:space-between;font-size:0.78rem">
-            <span style="color:var(--gold);font-weight:600"><span id="founder-taken">—</span> of 20 Founding spots claimed</span>
-            <span style="color:var(--muted)"><span id="founder-left">—</span> remaining</span>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.75rem;text-align:center">
+            <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold)">85%</div>
+            <div style="font-size:0.8rem;color:var(--muted)">Revenue You Keep</div>
           </div>
-        </div>
-
-        <!-- Tier cards -->
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2.5rem;text-align:left">
-
-          <!-- Tier 1 -->
-          <div style="background:var(--bg2);border:1px solid rgba(201,145,61,0.35);border-radius:var(--radius);padding:1.5rem;position:relative">
-            <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--gold);color:#0A0908;font-size:0.7rem;font-weight:700;padding:3px 12px;border-radius:20px;white-space:nowrap;letter-spacing:0.05em">🔥 JOIN NOW</div>
-            <div style="font-size:0.72rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.12em;font-weight:700;margin-bottom:6px">Founding Member</div>
-            <div style="font-size:0.75rem;color:var(--muted);margin-bottom:12px">Spots 1–20</div>
-            <div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--white);margin-bottom:2px">$0<span style="font-size:0.9rem;color:var(--muted);font-family:'DM Sans',sans-serif">/mo forever</span></div>
-            <div style="font-size:0.78rem;color:var(--muted);margin-bottom:14px">15% commission only</div>
-            <ul style="list-style:none;margin-bottom:16px">
-              <li style="font-size:0.82rem;color:var(--white);padding:4px 0;display:flex;gap:6px;align-items:center"><span style="color:var(--gold);font-size:0.65rem">✦</span>Free forever — locked in</li>
-              <li style="font-size:0.82rem;color:var(--white);padding:4px 0;display:flex;gap:6px;align-items:center"><span style="color:var(--gold);font-size:0.65rem">✦</span>Weekly automatic payouts</li>
-              <li style="font-size:0.82rem;color:var(--muted);padding:4px 0;display:flex;gap:6px;align-items:center"><span style="color:var(--gold);font-size:0.65rem">✦</span>Priority profile placement</li>
-              <li style="font-size:0.82rem;color:var(--muted);padding:4px 0;display:flex;gap:6px;align-items:center"><span style="color:var(--gold);font-size:0.65rem">✦</span>Founding badge on profile</li>
-            </ul>
-            <div style="font-size:0.8rem;color:#4CAF78">✦ Open — <span id="t1-left">—</span> spots left</div>
-          </div>
-
-          <!-- Tier 2 -->
-          <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:1.5rem;position:relative">
-            <div style="font-size:0.72rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.12em;font-weight:700;margin-bottom:6px">Early Adopter</div>
-            <div style="font-size:0.75rem;color:var(--muted);margin-bottom:12px">Spots 21–50</div>
-            <div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--white);margin-bottom:2px">$4.99<span style="font-size:0.9rem;color:var(--muted);font-family:'DM Sans',sans-serif">/mo</span></div>
-            <div style="font-size:0.78rem;color:var(--muted);margin-bottom:14px">15% commission only</div>
-            <ul style="list-style:none;margin-bottom:16px">
-              <li style="font-size:0.82rem;color:var(--white);padding:4px 0;display:flex;gap:6px;align-items:center"><span style="color:var(--gold);font-size:0.65rem">✦</span>Weekly automatic payouts</li>
-              <li style="font-size:0.82rem;color:var(--muted);padding:4px 0;display:flex;gap:6px;align-items:center"><span style="color:var(--gold);font-size:0.65rem">✦</span>Early adopter badge</li>
-              <li style="font-size:0.82rem;color:var(--muted);padding:4px 0;display:flex;gap:6px;align-items:center"><span style="color:var(--gold);font-size:0.65rem">✦</span>Reduced rate locked in</li>
-              <li style="font-size:0.82rem;color:var(--muted);padding:4px 0;display:flex;gap:6px;align-items:center"><span style="color:var(--gold);font-size:0.65rem">✦</span>Priority support</li>
-            </ul>
-            <div style="font-size:0.8rem;color:var(--gold)">◈ Opens after Tier 1 fills</div>
-          </div>
-
-          <!-- Tier 3 -->
-          <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:1.5rem;position:relative">
-            <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em;font-weight:700;margin-bottom:6px">Standard</div>
-            <div style="font-size:0.75rem;color:var(--muted);margin-bottom:12px">Spots 51+</div>
-            <div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--white);margin-bottom:2px">$9.99<span style="font-size:0.9rem;color:var(--muted);font-family:'DM Sans',sans-serif">/mo</span></div>
-            <div style="font-size:0.78rem;color:var(--muted);margin-bottom:14px">15% commission only</div>
-            <ul style="list-style:none;margin-bottom:16px">
-              <li style="font-size:0.82rem;color:var(--muted);padding:4px 0;display:flex;gap:6px;align-items:center"><span style="color:var(--muted);font-size:0.65rem">✦</span>Weekly automatic payouts</li>
-              <li style="font-size:0.82rem;color:var(--muted);padding:4px 0;display:flex;gap:6px;align-items:center"><span style="color:var(--muted);font-size:0.65rem">✦</span>Full platform access</li>
-              <li style="font-size:0.82rem;color:var(--bg3);padding:4px 0">—</li>
-              <li style="font-size:0.82rem;color:var(--bg3);padding:4px 0">—</li>
-            </ul>
-            <div style="font-size:0.8rem;color:var(--muted)">— Coming soon</div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.75rem;text-align:center">
+            <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold)">7 days</div>
+            <div style="font-size:0.8rem;color:var(--muted)">Payout Cycle</div>
           </div>
         </div>
-
-        <button class="btn btn-gold" style="font-size:1rem;padding:0.9rem 2.5rem" onclick="openAuth('signup','creator')">Claim Your Founding Spot</button>
+        <button class="btn btn-gold" onclick="openAuth('signup','creator')">Apply as Founding Creator</button>
       </div>
     </div>
   </div>
@@ -595,8 +542,6 @@ footer a:hover{color:var(--gold)}
           <div class="step-dot" id="step-2"></div>
           <div class="step-dot" id="step-3"></div>
           <div class="step-dot" id="step-4"></div>
-          <div class="step-dot" id="step-5"></div>
-          <div class="step-dot" id="step-6"></div>
         </div>
         <div id="onboard-step-content"></div>
       </div>
@@ -783,7 +728,7 @@ const state = {
 };
 
 async function init() {
-  if (!sessionStorage.getItem('hh_age')) { showEl('age-gate'); return; }
+  if (!localStorage.getItem('hh_age')) { showEl('age-gate'); return; }
   hideEl('age-gate');
   const { data: { session } } = await db.auth.getSession();
   if (session?.user) { state.user = session.user; await loadProfile(); }
@@ -807,7 +752,7 @@ function verifyAge() {
   const birth = new Date(y, m-1, d);
   const age = Math.floor((Date.now() - birth) / 31557600000);
   if (age < 18 || y < 1900 || y > 2006) return showToast('You must be 18 or older to enter', 'error');
-  sessionStorage.setItem('hh_age', '1');
+  localStorage.setItem('hh_age', '1');
   hideEl('age-gate');
   showEl('app', 'block');
   navigate('home');
@@ -819,7 +764,7 @@ async function navigate(page, params = {}) {
   const el = document.getElementById('page-' + page);
   if (el) el.classList.add('active');
   window.scrollTo(0, 0);
-  if (page === 'home') { await loadCreators(); updateFounderCounter(); }
+  if (page === 'home') await loadCreators();
   else if (page === 'profile' && params.username) await loadCreatorProfile(params.username);
   else if (page === 'creator-dashboard') await loadCreatorDashboard();
   else if (page === 'buyer-dashboard') await loadBuyerDashboard();
@@ -1172,70 +1117,66 @@ async function doLogout() {
 
 function showOnboardStep(step) {
   state.currentStep = step;
-  [1,2,3,4,5,6].forEach(i => {
+  [1,2,3,4].forEach(i => {
     const dot = document.getElementById('step-' + i);
-    if (dot) dot.className = 'step-dot' + (i < step ? ' done' : i === step ? ' active' : '');
+    if (dot) {
+      dot.className = 'step-dot' + (i < step ? ' done' : i === step ? ' active' : '');
+    }
   });
   const content = document.getElementById('onboard-step-content');
   const steps = {
     1: `
-      <div style="text-align:center;padding:0.5rem 0 1.5rem">
-        <div style="font-size:2.5rem;margin-bottom:1rem">✦</div>
-        <div class="founder-badge" style="margin-bottom:1.25rem">⭐ Founding Creator — Spot Secured</div>
-        <h2 style="font-size:1.7rem;margin-bottom:0.75rem">Welcome to HandHeaven.</h2>
-        <p style="color:var(--muted);font-size:0.9rem;line-height:1.8;margin-bottom:1.5rem">You're not just signing up to a platform — <strong style="color:var(--white)">you're building it with us.</strong> HandHeaven is in its founding phase, and creators like you are what make it real.</p>
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;text-align:left;margin-bottom:1.5rem">
-          <div style="font-size:0.8rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem">What to expect as a Founding Creator</div>
-          <div style="display:flex;flex-direction:column;gap:0.6rem">
-            <div style="display:flex;gap:0.75rem;align-items:flex-start;font-size:0.85rem">
-              <span style="color:var(--gold);flex-shrink:0">✦</span>
-              <span style="color:var(--muted)"><strong style="color:var(--white)">$0 forever.</strong> Your founding membership never changes, no matter how big we grow.</span>
-            </div>
-            <div style="display:flex;gap:0.75rem;align-items:flex-start;font-size:0.85rem">
-              <span style="color:var(--gold);flex-shrink:0">✦</span>
-              <span style="color:var(--muted)"><strong style="color:var(--white)">We're launching now.</strong> Buyers are being onboarded in parallel. Your content will be ready when they arrive.</span>
-            </div>
-            <div style="display:flex;gap:0.75rem;align-items:flex-start;font-size:0.85rem">
-              <span style="color:var(--gold);flex-shrink:0">✦</span>
-              <span style="color:var(--muted)"><strong style="color:var(--white)">Your profile matters.</strong> A complete profile with quality content converts buyers from day one.</span>
-            </div>
-            <div style="display:flex;gap:0.75rem;align-items:flex-start;font-size:0.85rem">
-              <span style="color:var(--gold);flex-shrink:0">✦</span>
-              <span style="color:var(--muted)"><strong style="color:var(--white)">You have a voice.</strong> Founding creators help shape features, pricing, and direction.</span>
-            </div>
-          </div>
-        </div>
-        <button class="btn btn-gold btn-full" onclick="showOnboardStep(2)">Let's Build This Together →</button>
-      </div>`,
-
-    2: `
       <h2>Build Your Profile</h2>
-      <p style="color:var(--muted);font-size:0.88rem;margin-bottom:1.5rem">This is how buyers discover you. Take a moment to make it shine.</p>
+      <p>This is how buyers will discover you on HandHeaven.</p>
+      <div class="founder-badge">⭐ Founding Creator — Free Forever</div>
       <div class="form-group">
         <label class="form-label">Display Name *</label>
-        <input type="text" class="form-input" id="ob-name" placeholder="How you'll appear to buyers" value="${state.profile?.display_name || ''}">
+        <input type="text" class="form-input" id="ob-name" placeholder="How you'll appear to buyers">
       </div>
       <div class="form-group">
-        <label class="form-label">Bio <span style="color:var(--muted);font-weight:400">(sell yourself in 2 sentences)</span></label>
-        <textarea class="form-input form-textarea" id="ob-bio" placeholder="Tell buyers what makes your hands unique...">${state.profile?.bio || ''}</textarea>
+        <label class="form-label">Bio</label>
+        <textarea class="form-input form-textarea" id="ob-bio" placeholder="Tell buyers what makes your hands unique..."></textarea>
       </div>
       <div class="form-group">
-        <label class="form-label">Tags <span style="color:var(--muted);font-weight:400">(helps buyers find you)</span></label>
-        <input type="text" class="form-input" id="ob-tags" placeholder="nail art, jewelry, elegant, aesthetic..." value="${state.profile?.tags?.join(', ') || ''}">
-        <p class="form-hint">Add 3–5 tags that describe your style</p>
+        <label class="form-label">Tags (helps buyers find you)</label>
+        <input type="text" class="form-input" id="ob-tags" placeholder="nail art, jewelry, elegant, aesthetic...">
       </div>
       <div class="form-group">
-        <label class="form-label">Location <span style="color:var(--muted);font-weight:400">(optional)</span></label>
-        <input type="text" class="form-input" id="ob-location" placeholder="City, Country" value="${state.profile?.location || ''}">
+        <label class="form-label">Location (optional)</label>
+        <input type="text" class="form-input" id="ob-location" placeholder="City, Country">
+      </div>
+      <button class="btn btn-gold btn-full" onclick="onboardStep2()">Continue →</button>`,
+    2: `
+      <h2>Set Your Pricing</h2>
+      <p>Choose your monthly subscription price. You can change this anytime.</p>
+      <div class="form-group">
+        <label class="form-label">Monthly Subscription Price</label>
+        <div class="input-prefix">
+          <span>$</span>
+          <input type="number" class="form-input" id="ob-price" value="9.99" min="3" max="50" step="0.01">
+        </div>
+        <p class="form-hint">You keep 85% of every subscription. HandHeaven keeps 15%.</p>
+      </div>
+      <div style="background:var(--gold-d);border:1px solid var(--gold-b);border-radius:var(--radius-s);padding:1rem;margin-bottom:1.5rem">
+        <div style="font-size:0.82rem;color:var(--gold);margin-bottom:0.5rem">Example earnings with 10 subscribers:</div>
+        <div id="earnings-preview" style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--white)">$84.91/month</div>
+        <div style="font-size:0.75rem;color:var(--muted);margin-top:0.25rem">after 15% platform fee</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Payout Method</label>
+        <select class="form-input form-select" id="ob-payout">
+          <option value="paxum">Paxum (recommended)</option>
+          <option value="bank">Bank Transfer</option>
+        </select>
+        <p class="form-hint">Payouts every Friday. Minimum $20.</p>
       </div>
       <div style="display:flex;gap:0.75rem">
         <button class="btn btn-outline" onclick="showOnboardStep(1)">Back</button>
-        <button class="btn btn-gold" style="flex:1" onclick="onboardStep2()">Continue →</button>
+        <button class="btn btn-gold" style="flex:1" onclick="onboardStep3()">Continue →</button>
       </div>`,
-
     3: `
       <h2>Legal Verification</h2>
-      <p style="color:var(--muted);font-size:0.88rem;margin-bottom:1.5rem">Required by law (18 U.S.C. § 2257). All creators must verify their age and identity.</p>
+      <p>Required by law (18 U.S.C. § 2257) for all content creators.</p>
       <div class="form-group">
         <label class="form-label">Legal Full Name *</label>
         <input type="text" class="form-input" id="ob-legal-name" placeholder="Your legal name as on ID">
@@ -1253,197 +1194,33 @@ function showOnboardStep(step) {
         </select>
       </div>
       <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-s);padding:1rem;margin-bottom:1.5rem;font-size:0.82rem;color:var(--muted);line-height:1.6">
-        🔒 Your information is encrypted and stored securely. Never shared with buyers or third parties. Used exclusively for legal compliance.
+        ⚠ Your information is encrypted and stored securely. It is only used for legal compliance and is never shared with buyers or third parties.
       </div>
       <div style="display:flex;gap:0.75rem">
         <button class="btn btn-outline" onclick="showOnboardStep(2)">Back</button>
-        <button class="btn btn-gold" style="flex:1" onclick="onboardStep3()">Verify & Continue →</button>
+        <button class="btn btn-gold" style="flex:1" onclick="onboardStep4()">Verify & Continue →</button>
       </div>`,
-
     4: `
-      <h2>Set Your Pricing</h2>
-      <p style="color:var(--muted);font-size:0.88rem;margin-bottom:1.5rem">Your monthly subscription price. You can change this anytime from your dashboard.</p>
-      <div class="form-group">
-        <label class="form-label">Monthly Subscription Price</label>
-        <div class="input-prefix">
-          <span>$</span>
-          <input type="number" class="form-input" id="ob-price" value="${state.profile?.subscription_price || '9.99'}" min="3" max="50" step="0.01" oninput="updateEarningsPreview(this.value)">
+      <div style="text-align:center;padding:1rem 0">
+        <div style="font-size:3rem;margin-bottom:1rem">✦</div>
+        <h2>You're Live on HandHeaven</h2>
+        <p style="margin-bottom:2rem">Your creator profile is ready. Start uploading content and share your profile link to start earning.</p>
+        <div style="background:var(--gold-d);border:1px solid var(--gold-b);border-radius:var(--radius-s);padding:1rem;margin-bottom:1.5rem;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--gold);word-break:break-all">
+          handheaven.com/${state.profile?.username || 'your-username'}
         </div>
-        <p class="form-hint">You keep 85%. HandHeaven keeps 15%. No other fees.</p>
-      </div>
-      <div style="background:var(--gold-d);border:1px solid var(--gold-b);border-radius:var(--radius-s);padding:1rem;margin-bottom:1.5rem">
-        <div style="font-size:0.78rem;color:var(--gold);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.08em">Your earnings with 10 subscribers</div>
-        <div id="earnings-preview" style="font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--white)">$84.91/month</div>
-        <div style="font-size:0.75rem;color:var(--muted);margin-top:0.25rem">after 15% platform fee · paid every Friday</div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Preferred Payout Method</label>
-        <select class="form-input form-select" id="ob-payout">
-          <option value="paxum">Paxum (recommended — international)</option>
-          <option value="bank">Bank Transfer</option>
-        </select>
-        <p class="form-hint">Payouts every Friday. Minimum $20. Setup instructions sent to your email.</p>
-      </div>
-      <div style="display:flex;gap:0.75rem">
-        <button class="btn btn-outline" onclick="showOnboardStep(3)">Back</button>
-        <button class="btn btn-gold" style="flex:1" onclick="onboardStep4()">Continue →</button>
-      </div>`,
-
-    5: `
-      <h2>Upload Your First Content</h2>
-      <p style="color:var(--muted);font-size:0.88rem;margin-bottom:0.75rem">Upload at least <strong style="color:var(--white)">5 photos</strong> to activate your profile. Buyers decide to subscribe based on what they see first — make it count.</p>
-      <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-s);padding:0.9rem;margin-bottom:1.25rem;font-size:0.82rem;color:var(--muted);line-height:1.6">
-        💡 <strong style="color:var(--white)">Pro tip:</strong> Include 1–2 free preview photos and 3–4 subscriber-only shots. The free ones attract, the locked ones convert.
-      </div>
-
-      <!-- Upload zone -->
-      <div class="upload-zone" id="ob-upload-zone" onclick="document.getElementById('ob-file-input').click()" ondragover="handleDragOver(event)" ondrop="handleObDrop(event)" style="padding:1.5rem;margin-bottom:1rem">
-        <input type="file" id="ob-file-input" accept="image/*" multiple style="display:none" onchange="handleObFiles(this.files)">
-        <div class="upload-zone-icon">◈</div>
-        <p><strong style="color:var(--white)">Click or drag to upload</strong></p>
-        <p style="font-size:0.75rem;margin-top:0.25rem">JPG, PNG, WEBP supported</p>
-      </div>
-
-      <!-- Progress counter -->
-      <div style="margin-bottom:1rem">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
-          <span style="font-size:0.82rem;color:var(--muted)">Photos uploaded</span>
-          <span style="font-size:0.88rem;color:var(--gold);font-weight:600"><span id="ob-photo-count">0</span> / 5 minimum</span>
-        </div>
-        <div style="background:var(--bg2);border-radius:20px;height:6px;overflow:hidden;border:1px solid var(--border2)">
-          <div id="ob-photo-bar" style="height:100%;border-radius:20px;background:var(--gold);width:0%;transition:width 0.3s"></div>
-        </div>
-      </div>
-
-      <!-- Preview grid -->
-      <div id="ob-preview-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:1.25rem"></div>
-
-      <div id="ob-upload-error" class="form-error" style="display:none;margin-bottom:0.75rem"></div>
-      <div style="display:flex;gap:0.75rem">
-        <button class="btn btn-outline" onclick="showOnboardStep(4)">Back</button>
-        <button class="btn btn-gold" style="flex:1" id="ob-upload-btn" onclick="onboardStep5()">Go Live →</button>
-      </div>`,
-
-    6: `
-      <div style="text-align:center;padding:0.5rem 0">
-        <div style="font-size:2.5rem;margin-bottom:0.75rem">✦</div>
-        <h2 style="font-size:1.7rem;margin-bottom:0.5rem">You're Live.</h2>
-        <p style="color:var(--muted);font-size:0.88rem;margin-bottom:1.5rem">Your HandHeaven profile is active. Here's what happens next.</p>
-
-        <!-- Profile link -->
-        <div style="background:var(--gold-d);border:1px solid var(--gold-b);border-radius:var(--radius-s);padding:0.9rem;margin-bottom:1.5rem;font-size:0.85rem;color:var(--gold);word-break:break-all;cursor:pointer" onclick="copyProfileLink()">
-          📎 handheaven.com/${state.profile?.username || 'your-username'} <span style="font-size:0.75rem;color:var(--muted)">(click to copy)</span>
-        </div>
-
-        <!-- Roadmap / Expectations -->
-        <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:1.25rem;text-align:left;margin-bottom:1.5rem">
-          <div style="font-size:0.78rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1rem">What's happening right now</div>
-          <div style="display:flex;flex-direction:column;gap:0.85rem">
-            <div style="display:flex;gap:0.75rem;align-items:flex-start">
-              <div style="width:24px;height:24px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#0A0908;font-weight:700;flex-shrink:0">1</div>
-              <div>
-                <div style="font-size:0.85rem;color:var(--white);margin-bottom:2px">Recruiting buyers in parallel</div>
-                <div style="font-size:0.78rem;color:var(--muted)">We're actively promoting HandHeaven to buyers through social media, Reddit, and paid channels. Your content will be ready when they arrive.</div>
-              </div>
-            </div>
-            <div style="display:flex;gap:0.75rem;align-items:flex-start">
-              <div style="width:24px;height:24px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--muted);flex-shrink:0">2</div>
-              <div>
-                <div style="font-size:0.85rem;color:var(--white);margin-bottom:2px">First buyers expected in 2–4 weeks</div>
-                <div style="font-size:0.78rem;color:var(--muted)">As a founding creator, your profile gets priority placement the moment buyers land on the platform.</div>
-              </div>
-            </div>
-            <div style="display:flex;gap:0.75rem;align-items:flex-start">
-              <div style="width:24px;height:24px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--muted);flex-shrink:0">3</div>
-              <div>
-                <div style="font-size:0.85rem;color:var(--white);margin-bottom:2px">Weekly updates to all creators</div>
-                <div style="font-size:0.78rem;color:var(--muted)">You'll receive a weekly email with platform growth, buyer signups, and milestones. You'll always know what's happening.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- How to help -->
-        <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:1.25rem;text-align:left;margin-bottom:1.5rem">
-          <div style="font-size:0.78rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem">How you can help grow HandHeaven</div>
-          <div style="font-size:0.85rem;color:var(--muted);line-height:1.7">
-            The fastest way to get buyers is <strong style="color:var(--white)">sharing your profile link.</strong> Post it on your Reddit, Instagram, or anywhere you already have an audience. Every person who clicks and signs up as a buyer directly benefits you.
-          </div>
-          <div style="margin-top:0.75rem;display:flex;gap:0.75rem;flex-wrap:wrap">
-            <button class="btn btn-outline btn-sm" onclick="copyProfileLink()">Copy Profile Link</button>
-            <button class="btn btn-outline btn-sm" onclick="shareToReddit()">Share on Reddit</button>
-          </div>
-        </div>
-
-        <!-- Keep uploading -->
-        <div style="font-size:0.82rem;color:var(--muted);margin-bottom:1.5rem;line-height:1.6">
-          The more content you publish, the better your profile performs when buyers arrive. We recommend uploading <strong style="color:var(--white)">2–3 new pieces per week.</strong>
-        </div>
-
         <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap">
           <button class="btn btn-gold" onclick="navigate('creator-dashboard')">Go to Dashboard</button>
-          <button class="btn btn-outline" onclick="openUpload()">Upload More Content</button>
+          <button class="btn btn-outline" onclick="openUpload()">Upload First Content</button>
         </div>
       </div>`
   };
   content.innerHTML = steps[step] || '';
-  if (step === 4) {
-    document.getElementById('ob-price')?.addEventListener('input', e => updateEarningsPreview(e.target.value));
+  if (step === 2) {
+    document.getElementById('ob-price')?.addEventListener('input', e => {
+      const v = parseFloat(e.target.value) || 0;
+      document.getElementById('earnings-preview').textContent = `$${(v * 10 * 0.85).toFixed(2)}/month`;
+    });
   }
-}
-
-function updateEarningsPreview(val) {
-  const v = parseFloat(val) || 0;
-  const el = document.getElementById('earnings-preview');
-  if (el) el.textContent = `$${(v * 10 * 0.85).toFixed(2)}/month`;
-}
-
-function handleObDrop(e) {
-  e.preventDefault();
-  document.getElementById('ob-upload-zone')?.classList.remove('drag');
-  handleObFiles(e.dataTransfer.files);
-}
-
-function handleObFiles(files) {
-  const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
-  state.obFiles = [...(state.obFiles || []), ...newFiles];
-  updateObPhotoUI();
-}
-
-function updateObPhotoUI() {
-  const files = state.obFiles || [];
-  const count = files.length;
-  const pct = Math.min(100, Math.round((count / 5) * 100));
-  const countEl = document.getElementById('ob-photo-count');
-  const barEl = document.getElementById('ob-photo-bar');
-  const gridEl = document.getElementById('ob-preview-grid');
-  if (countEl) countEl.textContent = count;
-  if (barEl) barEl.style.width = pct + '%';
-  if (gridEl) {
-    gridEl.innerHTML = files.slice(0, 10).map((f, i) => {
-      const url = URL.createObjectURL(f);
-      return `<div style="aspect-ratio:1;border-radius:6px;overflow:hidden;background:var(--bg2);position:relative">
-        <img src="${url}" style="width:100%;height:100%;object-fit:cover">
-        <button onclick="removeObFile(${i})" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.7);color:white;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
-      </div>`;
-    }).join('');
-  }
-}
-
-function removeObFile(index) {
-  state.obFiles = (state.obFiles || []).filter((_, i) => i !== index);
-  updateObPhotoUI();
-}
-
-function copyProfileLink() {
-  const url = `https://handheaven.com/${state.profile?.username || ''}`;
-  navigator.clipboard.writeText(url).then(() => showToast('Profile link copied! ✦', 'success'));
-}
-
-function shareToReddit() {
-  const url = encodeURIComponent(`https://handheaven.com/${state.profile?.username || ''}`);
-  const title = encodeURIComponent('Check out my HandHeaven profile — hand content marketplace');
-  window.open(`https://reddit.com/submit?url=${url}&title=${title}`, '_blank');
 }
 
 async function onboardStep2() {
@@ -1455,62 +1232,28 @@ async function onboardStep2() {
     tags, location: document.getElementById('ob-location')?.value.trim()
   }).eq('id', state.user.id);
   await loadProfile();
-  showOnboardStep(3);
+  showOnboardStep(2);
 }
 
 async function onboardStep3() {
+  const price = parseFloat(document.getElementById('ob-price')?.value) || 9.99;
+  const payout = document.getElementById('ob-payout')?.value;
+  await db.from('profiles').update({ subscription_price: price, social_links: { payout_method: payout } }).eq('id', state.user.id);
+  await loadProfile();
+  showOnboardStep(3);
+}
+
+async function onboardStep4() {
   const name = document.getElementById('ob-legal-name')?.value.trim();
   const dob = document.getElementById('ob-dob')?.value;
   if (!name || !dob) return showToast('Please fill in all required fields', 'error');
-  const age = Math.floor((Date.now() - new Date(dob)) / 31557600000);
+  const birthDate = new Date(dob);
+  const age = Math.floor((Date.now() - birthDate) / 31557600000);
   if (age < 18) return showToast('You must be 18 or older to create content', 'error');
   await db.from('compliance_records').upsert({ creator_id: state.user.id, legal_name: name, birth_date: dob, document_type: document.getElementById('ob-doc-type')?.value });
   await db.from('profiles').update({ age_verified: true, age_verified_at: new Date().toISOString() }).eq('id', state.user.id);
   await loadProfile();
   showOnboardStep(4);
-}
-
-async function onboardStep4() {
-  const price = parseFloat(document.getElementById('ob-price')?.value) || 9.99;
-  const payout = document.getElementById('ob-payout')?.value;
-  await db.from('profiles').update({ subscription_price: price, social_links: { payout_method: payout } }).eq('id', state.user.id);
-  await loadProfile();
-  state.obFiles = [];
-  showOnboardStep(5);
-}
-
-async function onboardStep5() {
-  const files = state.obFiles || [];
-  const err = document.getElementById('ob-upload-error');
-  if (files.length < 5) {
-    err.textContent = `Please upload at least 5 photos. You have ${files.length} so far.`;
-    err.style.display = 'block';
-    return;
-  }
-  err.style.display = 'none';
-  const btn = document.getElementById('ob-upload-btn');
-  btn.textContent = 'Uploading...'; btn.disabled = true;
-  try {
-    for (const file of files) {
-      const ext = file.name.split('.').pop();
-      const filePath = `${state.user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      await db.storage.from('content').upload(filePath, file);
-      const thumbPath = `${state.user.id}/${Date.now()}-thumb.${ext}`;
-      await db.storage.from('thumbnails').upload(thumbPath, file);
-      const { data } = db.storage.from('thumbnails').getPublicUrl(thumbPath);
-      await db.from('content').insert({
-        creator_id: state.user.id, title: 'My content',
-        content_type: 'photo', is_free: false,
-        thumbnail_url: data?.publicUrl, file_urls: [filePath], is_published: true
-      });
-    }
-    showOnboardStep(6);
-  } catch(e) {
-    err.textContent = e.message || 'Upload failed. Please try again.';
-    err.style.display = 'block';
-  } finally {
-    btn.textContent = 'Go Live →'; btn.disabled = false;
-  }
 }
 
 function openUpload() {
@@ -1622,18 +1365,6 @@ function timeAgo(dateStr) {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
 });
-
-async function updateFounderCounter() {
-  const { count } = await db.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'creator');
-  const taken = count || 0;
-  const left = Math.max(0, 20 - taken);
-  const pct = Math.min(100, Math.round((taken / 20) * 100));
-  const el = (id) => document.getElementById(id);
-  if (el('founder-taken')) el('founder-taken').textContent = taken;
-  if (el('founder-left')) el('founder-left').textContent = left;
-  if (el('founder-bar')) el('founder-bar').style.width = pct + '%';
-  if (el('t1-left')) el('t1-left').textContent = left;
-}
 
 init();
 </script>
