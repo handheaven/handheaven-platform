@@ -2627,6 +2627,13 @@ async function updateFounderCounter() {
   if (el('t1-left')) el('t1-left').textContent = left;
 }
 
+// Auto-open signup from landing page
+if (window.location.hash === '#join') {
+  window.addEventListener('load', () => {
+    setTimeout(() => openAuth('signup', 'creator'), 800);
+  });
+}
+
 init();
 </script>
 </body>
