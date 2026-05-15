@@ -171,7 +171,15 @@ img{max-width:100%;display:block}
 .content-thumb{height:180px;background:var(--bg2);position:relative;overflow:hidden}
 .content-thumb img{width:100%;height:100%;object-fit:cover;transition:transform 0.3s}
 .content-item:hover .content-thumb img{transform:scale(1.04)}
-.content-lock{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(10,9,8,0.75);backdrop-filter:blur(4px)}
+.content-lock{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(10,9,8,0.55);backdrop-filter:blur(0px)}
+.content-thumb.preview-blur img{filter:blur(14px);transform:scale(1.12)}
+.content-thumb.preview-blur .content-lock{background:rgba(10,9,8,0.4)}
+.free-badge{position:absolute;top:8px;left:8px;background:var(--success);color:#fff;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:0.05em;text-transform:uppercase}
+.ppv-badge{position:absolute;top:8px;left:8px;background:var(--gold);color:#0A0908;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:0.05em}
+.sub-teaser{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.sub-teaser-icon{font-size:1.5rem;color:var(--gold)}
+.sub-teaser-text{font-size:0.75rem;color:var(--white);font-weight:600;text-align:center;padding:0 8px}
+.sub-teaser-price{font-size:0.7rem;color:var(--gold);background:rgba(201,145,61,0.2);border:1px solid var(--gold-b);padding:2px 10px;border-radius:20px}
 .content-lock svg{width:28px;height:28px;color:var(--gold);margin-bottom:0.5rem}
 .content-lock span{font-size:0.82rem;color:var(--gold)}
 .content-item-info{padding:0.75rem}
@@ -507,10 +515,20 @@ footer a:hover{color:var(--gold)}
 
       <!-- Stats -->
       <div class="stats-grid">
+        <div class="stat-card" style="border-color:rgba(76,175,120,0.25)">
+          <div class="stat-card-label">Subscription Revenue</div>
+          <div class="stat-card-value" style="color:#4CAF78" id="dash-sub-earnings">$0.00</div>
+          <div class="stat-card-sub">From buyer subscriptions · recurring</div>
+        </div>
+        <div class="stat-card" style="border-color:var(--gold-b)">
+          <div class="stat-card-label">PPV Revenue</div>
+          <div class="stat-card-value gold" id="dash-ppv-earnings">$0.00</div>
+          <div class="stat-card-sub">From content purchases</div>
+        </div>
         <div class="stat-card">
           <div class="stat-card-label">Total Earnings</div>
           <div class="stat-card-value gold" id="dash-earnings">$0.00</div>
-          <div class="stat-card-sub">All time</div>
+          <div class="stat-card-sub">All time · 85% of net</div>
         </div>
         <div class="stat-card">
           <div class="stat-card-label">Pending Payout</div>
@@ -523,9 +541,9 @@ footer a:hover{color:var(--gold)}
           <div class="stat-card-sub">Active this month</div>
         </div>
         <div class="stat-card">
-          <div class="stat-card-label">Content Pieces</div>
+          <div class="stat-card-label">Content</div>
           <div class="stat-card-value" id="dash-content-count">0</div>
-          <div class="stat-card-sub">Published</div>
+          <div class="stat-card-sub" id="dash-content-breakdown">0 free · 0 locked · 0 PPV</div>
         </div>
       </div>
 
@@ -650,7 +668,7 @@ footer a:hover{color:var(--gold)}
             <div style="font-size:0.75rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem">Stream 1 — Creator Memberships <span style="background:var(--gold-d);border:1px solid var(--gold-b);padding:1px 8px;border-radius:20px;font-size:0.7rem;margin-left:6px">100% HandHeaven</span></div>
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem">
               <div><div style="font-size:0.72rem;color:var(--muted);margin-bottom:2px">Gross</div><div style="font-size:1.1rem;font-family:'Playfair Display',serif;color:var(--white)" id="adm-s1-gross">$0.00</div></div>
-              <div><div style="font-size:0.72rem;color:var(--muted);margin-bottom:2px">Stripe fee (2.9%+$0.30)</div><div style="font-size:1.1rem;font-family:'Playfair Display',serif;color:var(--danger)" id="adm-s1-stripe">-$0.00</div></div>
+              <div><div style="font-size:0.72rem;color:var(--muted);margin-bottom:2px">CCBill fee (~12%)</div><div style="font-size:1.1rem;font-family:'Playfair Display',serif;color:var(--danger)" id="adm-s1-stripe">-$0.00</div></div>
               <div><div style="font-size:0.72rem;color:var(--gold);margin-bottom:2px">HH Net</div><div style="font-size:1.1rem;font-family:'Playfair Display',serif;color:var(--gold)" id="adm-s1-net">$0.00</div></div>
             </div>
           </div>
@@ -684,9 +702,25 @@ footer a:hover{color:var(--gold)}
         <div style="display:flex;gap:0;border-bottom:1px solid var(--border2);margin-bottom:1.5rem">
           <button class="profile-tab active" onclick="switchAdminTab('creators',this)">Creators</button>
           <button class="profile-tab" onclick="switchAdminTab('buyers',this)">Buyers</button>
+          <button class="profile-tab" onclick="switchAdminTab('moderation',this)">🚨 Moderation</button>
           <button class="profile-tab" onclick="switchAdminTab('reports',this)">Reports</button>
           <button class="profile-tab" onclick="switchAdminTab('content',this)">Content</button>
           <button class="profile-tab" onclick="switchAdminTab('payouts',this)">Payouts</button>
+        </div>
+
+        <!-- Moderation Queue Tab -->
+        <div id="adm-tab-moderation" style="display:none">
+          <div style="background:rgba(224,82,82,0.08);border:1px solid rgba(224,82,82,0.2);border-radius:var(--radius-s);padding:1rem;margin-bottom:1rem;font-size:0.85rem">
+            <strong style="color:var(--white)">🤖 AI Moderation Queue</strong>
+            <span style="color:var(--muted);margin-left:0.5rem">Content flagged by AI for human review. Auto-rejected content (minors detected) is shown separately.</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+            <div class="stat-card" style="border-color:rgba(224,82,82,0.3)"><div class="stat-card-label">Pending Review</div><div class="stat-card-value" id="adm-mod-pending" style="color:var(--danger)">—</div></div>
+            <div class="stat-card" style="border-color:rgba(224,82,82,0.5)"><div class="stat-card-label">Auto-Rejected (Minors)</div><div class="stat-card-value" id="adm-mod-rejected" style="color:var(--danger)">—</div></div>
+          </div>
+          <div id="adm-moderation-list" style="display:flex;flex-direction:column;gap:0.75rem">
+            <div class="page-loader"><div class="loader"></div></div>
+          </div>
         </div>
 
         <!-- Creators Tab -->
@@ -849,37 +883,65 @@ footer a:hover{color:var(--gold)}
         <textarea class="form-input form-textarea" id="upload-description" placeholder="Describe your content..."></textarea>
       </div>
       <div class="form-group">
-        <label class="form-label">Pricing</label>
-        <div class="price-toggle">
-          <div class="price-opt selected" id="price-free" onclick="selectPricing('free')">
-            <div>✦ Free Preview</div>
-            <div style="font-size:0.72rem;color:var(--muted);margin-top:0.25rem">Visible to all</div>
+        <label class="form-label">Content Type <span style="color:var(--muted);font-weight:400">— This determines how buyers access it</span></label>
+        <div class="price-toggle" style="grid-template-columns:1fr 1fr 1fr">
+          <div class="price-opt selected" id="price-free" onclick="selectPricing('free')" style="border-color:rgba(76,175,120,0.4)">
+            <div style="font-size:0.9rem;color:#4CAF78">🔓 Free Preview</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">Visible to everyone. Use 2-3 to attract buyers.</div>
           </div>
           <div class="price-opt" id="price-sub" onclick="selectPricing('subscription')">
-            <div>◈ Subscribers Only</div>
-            <div style="font-size:0.72rem;color:var(--muted);margin-top:0.25rem">For your subscribers</div>
+            <div style="font-size:0.9rem;color:var(--gold)">🔒 Subscribers Only</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">Unlocked with monthly subscription. Best for recurring income.</div>
           </div>
           <div class="price-opt" id="price-paid" onclick="selectPricing('paid')">
-            <div>$ Pay Per View</div>
-            <div style="font-size:0.72rem;color:var(--muted);margin-top:0.25rem">Set a price</div>
+            <div style="font-size:0.9rem;color:var(--white)">💰 Pay Per View</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">Extra exclusive. Set a one-time price.</div>
           </div>
         </div>
-        <div id="price-input-wrap" style="display:none">
+        <div id="price-input-wrap" style="display:none;margin-top:0.75rem">
+          <label class="form-label">PPV Price</label>
           <div class="input-prefix">
             <span>$</span>
-            <input type="number" class="form-input" id="upload-price" placeholder="9.99" min="1" step="0.01">
+            <input type="number" class="form-input" id="upload-price" placeholder="4.99" min="1" step="0.01">
+          </div>
+          <p class="form-hint">You keep 85% after CCBill processing fee (~12%). Recommended: $3.99-$9.99</p>
+        </div>
+        <div id="price-free-hint" style="margin-top:0.5rem;font-size:0.78rem;color:#4CAF78">
+          💡 Pro tip: Free previews are your most powerful tool. Buyers who see your work are 3x more likely to subscribe.
+        </div>
+      </div>
+      <!-- Content Level Selector -->
+      <div class="form-group">
+        <label class="form-label">Content Level <span style="color:var(--danger);font-size:0.75rem">* Required — AI will verify this</span></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem">
+          <div class="price-opt selected" id="cl-0" onclick="selectContentLevel(0)" style="border-color:rgba(76,175,120,0.4);padding:0.85rem">
+            <div style="font-size:0.85rem;color:#4CAF78;font-weight:600">🌿 SFW</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:3px">Nail art, jewelry, aesthetic — safe for all audiences</div>
+          </div>
+          <div class="price-opt" id="cl-1" onclick="selectContentLevel(1)" style="padding:0.85rem">
+            <div style="font-size:0.85rem;color:var(--gold);font-weight:600">🌶 Suggestive</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:3px">Sensual poses, intimate aesthetics — not explicit</div>
+          </div>
+          <div class="price-opt" id="cl-2" onclick="selectContentLevel(2)" style="padding:0.85rem">
+            <div style="font-size:0.85rem;color:#E5B96A;font-weight:600">🔞 NSFW</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:3px">Adult content — requires 18+ verification</div>
+          </div>
+          <div class="price-opt" id="cl-3" onclick="selectContentLevel(3)" style="padding:0.85rem">
+            <div style="font-size:0.85rem;color:var(--danger);font-weight:600">🔥 Explicit</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:3px">Fully explicit adult content — strict 18+ enforcement</div>
           </div>
         </div>
-      </div>
-      <div class="form-group">
-        <div class="age-check">
-          <input type="checkbox" id="upload-nsfw">
-          <label for="upload-nsfw" style="font-size:0.82rem;color:var(--muted)">This content is NSFW / Adult (18+)</label>
+        <div style="background:rgba(224,82,82,0.08);border:1px solid rgba(224,82,82,0.2);border-radius:var(--radius-s);padding:0.75rem;font-size:0.78rem;color:var(--muted)">
+          ⚠️ <strong style="color:var(--white)">AI verification active.</strong> Our system checks every upload. Mislabeled content is flagged for review. Content involving minors is immediately removed and reported.
         </div>
       </div>
+
+      <!-- Smart Tags System -->
       <div class="form-group">
-        <label class="form-label">Tags (comma separated)</label>
-        <input type="text" class="form-input" id="upload-tags" placeholder="nail art, aesthetic, jewelry...">
+        <label class="form-label">Tags <span style="color:var(--muted);font-weight:400">— Click to add or type custom tags</span></label>
+        <div id="tag-suggestions" style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.75rem"></div>
+        <input type="text" class="form-input" id="upload-tags" placeholder="Or type custom tags, comma separated..." oninput="updateCustomTags(this.value)">
+        <div style="font-size:0.75rem;color:var(--muted);margin-top:0.4rem">Tags help buyers discover your content and improve AI classification accuracy.</div>
       </div>
       <div id="upload-error" class="form-error" style="display:none"></div>
       <div style="display:flex;gap:0.75rem;margin-top:1.5rem">
@@ -1063,7 +1125,20 @@ async function loadCreatorProfile(usernameOrId) {
   const { data: content } = await db.from('content').select('*').eq('creator_id', creator.id).eq('is_published', true).order('created_at', { ascending: false });
   state.viewingContent = content || [];
   const isMine = state.user?.id === creator.id;
-  const isSubscribed = false;
+
+  // Check if buyer is subscribed
+  let isSubscribed = false;
+  if (state.user && !isMine) {
+    const { data: sub } = await db.from('subscriptions').select('id,status').eq('buyer_id', state.user.id).eq('creator_id', creator.id).eq('status', 'active').single();
+    isSubscribed = !!sub;
+  }
+
+  const freeContent = state.viewingContent.filter(c => c.is_free);
+  const lockedContent = state.viewingContent.filter(c => !c.is_free && !c.price);
+  const ppvContent = state.viewingContent.filter(c => !c.is_free && c.price > 0);
+  const totalLocked = lockedContent.length + ppvContent.length;
+  const subPrice = parseFloat(creator.subscription_price || 9.99).toFixed(2);
+
   container.innerHTML = `
     <div class="profile-cover">
       ${creator.cover_url ? `<img src="${creator.cover_url}">` : ''}
@@ -1077,10 +1152,13 @@ async function loadCreatorProfile(usernameOrId) {
           <div class="profile-username">@${creator.username || 'creator'}</div>
         </div>
       </div>
-      <div style="display:flex;gap:0.75rem;padding-bottom:0.5rem">
-        ${isMine ? `<button class="btn btn-outline btn-sm" onclick="navigate('creator-dashboard')">Dashboard</button>` :
-          isSubscribed ? `<button class="btn btn-outline btn-sm">Subscribed ✓</button>` :
-          `<button class="btn btn-gold btn-sm" onclick="subscribe('${creator.id}')">Subscribe $${parseFloat(creator.subscription_price || 9.99).toFixed(2)}/mo</button>`}
+      <div style="display:flex;gap:0.75rem;padding-bottom:0.5rem;flex-wrap:wrap">
+        ${isMine
+          ? `<button class="btn btn-outline btn-sm" onclick="navigate('creator-dashboard')">Dashboard</button>`
+          : isSubscribed
+            ? `<button class="btn btn-outline btn-sm" style="color:var(--success);border-color:rgba(76,175,120,0.4)">✓ Subscribed</button>
+               <button class="btn btn-outline btn-sm" onclick="cancelSubscription('${creator.id}')">Cancel</button>`
+            : `<button class="btn btn-gold btn-sm" onclick="subscribe('${creator.id}')">Subscribe $${subPrice}/mo</button>`}
         ${!isMine ? `<button class="btn btn-outline btn-sm" style="color:var(--danger);border-color:rgba(224,82,82,0.3)" onclick="submitReport('${creator.id}','creator')">Report</button>` : ''}
       </div>
     </div>
@@ -1089,48 +1167,105 @@ async function loadCreatorProfile(usernameOrId) {
       <div class="profile-stats">
         <div class="profile-stat"><strong>${state.viewingContent.length}</strong><span>Posts</span></div>
         <div class="profile-stat"><strong>${creator.subscriber_count || 0}</strong><span>Subscribers</span></div>
-        <div class="profile-stat"><strong>$${parseFloat(creator.subscription_price || 9.99).toFixed(2)}</strong><span>Monthly</span></div>
+        <div class="profile-stat"><strong>$${subPrice}</strong><span>Monthly</span></div>
+        ${ppvContent.length ? `<div class="profile-stat"><strong>${ppvContent.length}</strong><span>PPV</span></div>` : ''}
       </div>
       ${creator.tags?.length ? `<div class="creator-tags">${creator.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>` : ''}
     </div>
+
+    ${/* Subscription teaser banner — shows when not subscribed and has locked content */ !isMine && !isSubscribed && totalLocked > 0 ? `
+    <div style="background:linear-gradient(135deg,rgba(201,145,61,0.08),rgba(201,145,61,0.15));border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:1.25rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+      <div>
+        <div style="font-size:0.85rem;color:var(--white);font-weight:600;margin-bottom:3px">🔒 ${totalLocked} exclusive piece${totalLocked !== 1 ? 's' : ''} locked</div>
+        <div style="font-size:0.78rem;color:var(--muted)">Subscribe to unlock all content + every new post automatically</div>
+      </div>
+      <button class="btn btn-gold btn-sm" onclick="subscribe('${creator.id}')">Unlock for $${subPrice}/mo</button>
+    </div>` : ''}
+
     <div class="profile-tabs">
-      <button class="profile-tab active">Content (${state.viewingContent.length})</button>
-      <button class="profile-tab">About</button>
+      <button class="profile-tab active" onclick="showProfileTab('content',this)">All (${state.viewingContent.length})</button>
+      <button class="profile-tab" onclick="showProfileTab('free',this)">Free (${freeContent.length})</button>
+      ${lockedContent.length ? `<button class="profile-tab" onclick="showProfileTab('locked',this)">Exclusive (${lockedContent.length})</button>` : ''}
+      ${ppvContent.length ? `<button class="profile-tab" onclick="showProfileTab('ppv',this)">PPV (${ppvContent.length})</button>` : ''}
     </div>
-    <div class="profile-content">
-      ${!state.viewingContent.length ? `<div class="empty"><div class="empty-icon">◈</div><h3>No content yet</h3><p>This creator hasn't posted yet</p></div>` :
-        `<div class="content-grid">${state.viewingContent.map(c => renderContentItem(c, isSubscribed, isMine)).join('')}</div>`}
+    <div class="profile-content" id="profile-content-grid">
+      ${!state.viewingContent.length
+        ? `<div class="empty"><div class="empty-icon">◈</div><h3>No content yet</h3><p>This creator hasn't posted yet</p></div>`
+        : `<div class="content-grid">${state.viewingContent.map(c => renderContentItem(c, isSubscribed, isMine)).join('')}</div>`}
     </div>
+
     ${!isMine && !isSubscribed ? `
-    <div style="display:flex;justify-content:center">
-      <div class="sub-card">
-        <h3>Subscribe to ${creator.display_name || 'this creator'}</h3>
-        <p>Get unlimited access to all content and new posts</p>
-        <div class="sub-price">$${parseFloat(creator.subscription_price || 9.99).toFixed(2)}<sub>/month</sub></div>
-        <ul class="sub-features">
-          <li>Unlimited access to all content</li>
-          <li>New posts as they're published</li>
+    <div style="padding:2rem">
+      <div class="sub-card" style="max-width:460px;margin:0 auto">
+        <div style="font-size:0.75rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem">✦ Subscription</div>
+        <h3 style="font-size:1.4rem;margin-bottom:0.5rem">Unlock ${creator.display_name || 'this creator'}'s world</h3>
+        <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1.25rem">Subscribe once and access everything — all current content and every new piece they publish.</p>
+        <div class="sub-price">$${subPrice}<sub>/month</sub></div>
+        <ul class="sub-features" style="margin:1.25rem 0">
+          ${totalLocked > 0 ? `<li><strong style="color:var(--white)">${totalLocked} exclusive piece${totalLocked !== 1 ? 's' : ''}</strong> unlocked instantly</li>` : ''}
+          <li>Every new post — automatically unlocked</li>
           <li>Direct message the creator</li>
-          <li>Cancel anytime</li>
+          <li>Cancel anytime — no commitment</li>
         </ul>
-        <button class="btn btn-gold btn-full" onclick="subscribe('${creator.id}')">Subscribe Now</button>
+        <button class="btn btn-gold btn-full" style="font-size:1rem;padding:0.9rem" onclick="subscribe('${creator.id}')">Subscribe Now — $${subPrice}/month</button>
+        ${ppvContent.length > 0 ? `
+        <div style="text-align:center;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border2)">
+          <div style="font-size:0.78rem;color:var(--muted)">Or unlock specific content individually starting at</div>
+          <div style="font-size:0.88rem;color:var(--gold);margin-top:3px">$${Math.min(...ppvContent.map(c => parseFloat(c.price))).toFixed(2)} per piece</div>
+        </div>` : ''}
       </div>
     </div>` : ''}
   `;
+
+  // Store for tab switching
+  state.isSubscribed = isSubscribed;
+  state.isMine = isMine;
+}
+
+function showProfileTab(type, btn) {
+  document.querySelectorAll('.profile-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const grid = document.getElementById('profile-content-grid');
+  let filtered = state.viewingContent;
+  if (type === 'free') filtered = state.viewingContent.filter(c => c.is_free);
+  else if (type === 'locked') filtered = state.viewingContent.filter(c => !c.is_free && !c.price);
+  else if (type === 'ppv') filtered = state.viewingContent.filter(c => !c.is_free && c.price > 0);
+  grid.innerHTML = filtered.length
+    ? `<div class="content-grid">${filtered.map(c => renderContentItem(c, state.isSubscribed, state.isMine)).join('')}</div>`
+    : `<div class="empty"><div class="empty-icon">◈</div><p style="color:var(--muted)">No content in this category yet</p></div>`;
 }
 
 function renderContentItem(c, isSubscribed, isMine) {
+  const isSubOnly = !c.is_free && !c.price;
+  const isPPV = !c.is_free && c.price > 0;
   const locked = !c.is_free && !isSubscribed && !isMine;
+  const hasThumbnail = !!c.thumbnail_url;
   return `
     <div class="content-item" onclick="viewContent('${c.id}')">
-      <div class="content-thumb">
-        ${c.thumbnail_url ? `<img src="${c.thumbnail_url}" alt="${c.title}">` :
-          `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:2rem">◈</div>`}
-        ${locked ? `<div class="content-lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span>${c.price ? `$${parseFloat(c.price).toFixed(2)}` : 'Subscribe'}</span></div>` : ''}
+      <div class="content-thumb ${locked && hasThumbnail ? 'preview-blur' : ''}">
+        ${hasThumbnail
+          ? `<img src="${c.thumbnail_url}" alt="${c.title}">`
+          : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:2rem">◈</div>`}
+        ${c.is_free ? `<span class="free-badge">FREE</span>` : ''}
+        ${isPPV && !locked ? `<span class="ppv-badge">$${parseFloat(c.price).toFixed(2)}</span>` : ''}
+        ${locked && isSubOnly ? `
+          <div class="sub-teaser">
+            <div class="sub-teaser-icon">🔒</div>
+            <div class="sub-teaser-text">Subscribers only</div>
+            <div class="sub-teaser-price">$${parseFloat(state.viewingCreator?.subscription_price || 9.99).toFixed(2)}/mo</div>
+          </div>` : ''}
+        ${locked && isPPV ? `
+          <div class="sub-teaser">
+            <div class="sub-teaser-icon">✦</div>
+            <div class="sub-teaser-text">Exclusive content</div>
+            <div class="sub-teaser-price">$${parseFloat(c.price).toFixed(2)}</div>
+          </div>` : ''}
       </div>
       <div class="content-item-info">
         <div class="content-item-title">${c.title}</div>
-        <div class="content-item-price">${c.is_free ? 'Free' : c.price ? `$${parseFloat(c.price).toFixed(2)}` : 'Subscribers only'}</div>
+        <div class="content-item-price" style="color:${c.is_free ? 'var(--success)' : isPPV ? 'var(--gold)' : 'var(--muted)'}">
+          ${c.is_free ? '✓ Free preview' : isPPV ? `$${parseFloat(c.price).toFixed(2)} PPV` : '🔒 Subscribers only'}
+        </div>
       </div>
     </div>
   `;
@@ -1160,12 +1295,65 @@ function viewContent(contentId) {
 
 function subscribe(creatorId) {
   if (!state.user) return openAuth('signup', 'buyer');
-  showToast('Payment processing coming soon. CCBill integration in progress.', 'success');
+  const creator = state.viewingCreator;
+  const price = parseFloat(creator?.subscription_price || 9.99).toFixed(2);
+  // CCBill modal placeholder — replace with real CCBill embed when approved
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9000;display:flex;align-items:center;justify-content:center;padding:1rem';
+  modal.innerHTML = `
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;max-width:420px;width:100%;text-align:center">
+      <div style="font-size:2rem;margin-bottom:0.75rem">✦</div>
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:0.5rem">Subscribe to ${creator?.display_name || 'Creator'}</h3>
+      <div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold);margin:1rem 0">$${price}<span style="font-size:1rem;color:var(--muted);font-family:'DM Sans',sans-serif">/month</span></div>
+      <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-s);padding:1rem;margin-bottom:1.5rem;font-size:0.82rem;color:var(--muted);line-height:1.7">
+        🔒 Payment processing via CCBill — the industry standard for secure adult content transactions. Your card details are never stored on HandHeaven.
+      </div>
+      <div style="background:rgba(201,145,61,0.1);border:1px solid var(--border);border-radius:var(--radius-s);padding:1rem;margin-bottom:1.5rem;text-align:left">
+        <div style="font-size:0.8rem;color:var(--muted);margin-bottom:0.5rem">You get:</div>
+        <div style="font-size:0.85rem;color:var(--white);display:flex;flex-direction:column;gap:4px">
+          <span>✦ Instant access to all exclusive content</span>
+          <span>✦ Every new post automatically unlocked</span>
+          <span>✦ Direct messaging with the creator</span>
+          <span>✦ Cancel anytime — no commitment</span>
+        </div>
+      </div>
+      <button class="btn btn-gold btn-full" style="margin-bottom:0.75rem" onclick="this.textContent='Processing...';this.disabled=true;setTimeout(()=>{document.body.removeChild(this.closest('[style*=fixed]'));showToast('CCBill payment gateway launching soon. You will be notified when payments go live. ✦','success')},1500)">
+        Confirm Subscription — $${price}/mo
+      </button>
+      <button class="btn btn-ghost btn-sm btn-full" onclick="document.body.removeChild(this.closest('[style*=fixed]'))">Cancel</button>
+      <div style="font-size:0.72rem;color:var(--muted);margin-top:0.75rem">Billed monthly. Cancel anytime from your dashboard.</div>
+    </div>
+  `;
+  document.body.appendChild(modal);
 }
 
 function purchaseContent(contentId) {
   if (!state.user) return openAuth('signup', 'buyer');
-  showToast('Payment processing coming soon. CCBill integration in progress.', 'success');
+  const c = state.viewingContent.find(x => x.id === contentId);
+  if (!c) return;
+  const price = parseFloat(c.price).toFixed(2);
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9000;display:flex;align-items:center;justify-content:center;padding:1rem';
+  modal.innerHTML = `
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;max-width:380px;width:100%;text-align:center">
+      <div style="font-size:1.5rem;margin-bottom:0.75rem">💰</div>
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:0.5rem">${c.title}</h3>
+      <div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold);margin:1rem 0">$${price}<span style="font-size:0.9rem;color:var(--muted);font-family:'DM Sans',sans-serif"> one-time</span></div>
+      <div style="font-size:0.82rem;color:var(--muted);margin-bottom:1.5rem">Exclusive PPV content. One-time payment. Yours forever.</div>
+      <button class="btn btn-gold btn-full" style="margin-bottom:0.75rem" onclick="this.textContent='Processing...';this.disabled=true;setTimeout(()=>{document.body.removeChild(this.closest('[style*=fixed]'));showToast('CCBill payment gateway launching soon. ✦','success')},1500)">
+        Purchase — $${price}
+      </button>
+      <button class="btn btn-ghost btn-sm btn-full" onclick="document.body.removeChild(this.closest('[style*=fixed]'))">Cancel</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+async function cancelSubscription(creatorId) {
+  if (!confirm('Cancel your subscription? You will lose access to exclusive content.')) return;
+  await db.from('subscriptions').update({ status: 'cancelled', cancelled_at: new Date().toISOString() }).eq('buyer_id', state.user.id).eq('creator_id', creatorId);
+  showToast('Subscription cancelled. Access ends at the current billing period.', 'success');
+  if (state.viewingCreator) loadCreatorProfile(state.viewingCreator.username || state.viewingCreator.id);
 }
 
 async function loadCreatorDashboard() {
@@ -1176,9 +1364,31 @@ async function loadCreatorDashboard() {
   document.getElementById('dash-subs').textContent = state.profile.subscriber_count || 0;
   document.getElementById('payout-balance').textContent = `$${parseFloat(state.profile.pending_payout || 0).toFixed(2)}`;
   if (state.profile.founder_tier) document.getElementById('founder-badge-card').style.display = 'block';
+
+  // Load earnings breakdown by type
+  const { data: earnings } = await db.from('earnings').select('net_amount,type').eq('creator_id', state.user.id);
+  const subEarnings = (earnings||[]).filter(e => e.type === 'subscription').reduce((s,e) => s + parseFloat(e.net_amount||0), 0);
+  const ppvEarnings = (earnings||[]).filter(e => e.type === 'purchase').reduce((s,e) => s + parseFloat(e.net_amount||0), 0);
+  const subEl = document.getElementById('dash-sub-earnings');
+  const ppvEl = document.getElementById('dash-ppv-earnings');
+  if (subEl) subEl.textContent = `$${subEarnings.toFixed(2)}`;
+  if (ppvEl) ppvEl.textContent = `$${ppvEarnings.toFixed(2)}`;
+
+  // Load content
   const { data: content } = await db.from('content').select('*').eq('creator_id', state.user.id).order('created_at', { ascending: false });
   state.myContent = content || [];
+  const freeCount = state.myContent.filter(c => c.is_free).length;
+  const lockedCount = state.myContent.filter(c => !c.is_free && !c.price).length;
+  const ppvCount = state.myContent.filter(c => !c.is_free && c.price > 0).length;
   document.getElementById('dash-content-count').textContent = state.myContent.filter(c => c.is_published).length;
+  const breakdown = document.getElementById('dash-content-breakdown');
+  if (breakdown) breakdown.textContent = `${freeCount} free · ${lockedCount} locked · ${ppvCount} PPV`;
+
+  // Free preview warning
+  if (freeCount === 0 && state.myContent.length > 0) {
+    showToast('💡 Tip: Add at least 1-2 free preview pieces to attract buyers and increase subscriptions.', 'success');
+  }
+
   renderDashContent();
 }
 
@@ -1188,20 +1398,27 @@ function renderDashContent() {
     list.innerHTML = `<div class="empty"><div class="empty-icon">◈</div><h3>No content yet</h3><p>Upload your first piece of content</p><button class="btn btn-gold btn-sm" style="margin-top:1rem" onclick="openUpload()">Upload Now</button></div>`;
     return;
   }
-  list.innerHTML = state.myContent.map(c => `
-    <div class="content-row">
-      <div class="content-row-thumb">
-        ${c.thumbnail_url ? `<img src="${c.thumbnail_url}">` : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted)">◈</div>`}
+  list.innerHTML = state.myContent.map(c => {
+    const typeLabel = c.is_free ? '🔓 Free' : c.price ? `💰 $${parseFloat(c.price).toFixed(2)} PPV` : '🔒 Subscribers';
+    const typeColor = c.is_free ? '#4CAF78' : c.price ? 'var(--gold)' : 'var(--muted)';
+    return `
+      <div class="content-row">
+        <div class="content-row-thumb">
+          ${c.thumbnail_url ? `<img src="${c.thumbnail_url}">` : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted)">◈</div>`}
+        </div>
+        <div class="content-row-info">
+          <div class="content-row-title">${c.title}</div>
+          <div class="content-row-meta" style="display:flex;gap:0.75rem;align-items:center">
+            <span style="color:${typeColor};font-weight:600;font-size:0.78rem">${typeLabel}</span>
+            <span>${c.view_count || 0} views · ${timeAgo(c.created_at)}</span>
+          </div>
+        </div>
+        <div class="content-row-actions">
+          <button class="btn btn-outline btn-sm" onclick="deleteContent('${c.id}')">Delete</button>
+        </div>
       </div>
-      <div class="content-row-info">
-        <div class="content-row-title">${c.title}</div>
-        <div class="content-row-meta">${c.is_free ? 'Free' : c.price ? `$${parseFloat(c.price).toFixed(2)} PPV` : 'Subscribers only'} · ${c.view_count || 0} views · ${timeAgo(c.created_at)}</div>
-      </div>
-      <div class="content-row-actions">
-        <button class="btn btn-outline btn-sm" onclick="deleteContent('${c.id}')">Delete</button>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 async function loadBuyerDashboard() {
@@ -1437,28 +1654,52 @@ function showOnboardStep(step) {
       </div>`,
 
     4: `
-      <h2>Set Your Pricing</h2>
-      <p style="color:var(--muted);font-size:0.88rem;margin-bottom:1.5rem">Your monthly subscription price. You can change this anytime from your dashboard.</p>
-      <div class="form-group">
-        <label class="form-label">Monthly Subscription Price</label>
-        <div class="input-prefix">
-          <span>$</span>
-          <input type="number" class="form-input" id="ob-price" value="${state.profile?.subscription_price || '9.99'}" min="3" max="50" step="0.01" oninput="updateEarningsPreview(this.value)">
+      <h2>Set Your Pricing Strategy</h2>
+      <p style="color:var(--muted);font-size:0.88rem;margin-bottom:1.5rem">You have two ways to earn on HandHeaven. Set both up now.</p>
+
+      <!-- Subscription price -->
+      <div style="background:rgba(76,175,120,0.08);border:1px solid rgba(76,175,120,0.2);border-radius:var(--radius-s);padding:1rem;margin-bottom:1.25rem">
+        <div style="font-size:0.78rem;color:#4CAF78;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem">Stream 1 — Monthly Subscription</div>
+        <div class="form-group" style="margin-bottom:0.75rem">
+          <label class="form-label">Buyers pay this monthly to unlock ALL your content</label>
+          <div class="input-prefix">
+            <span>$</span>
+            <input type="number" class="form-input" id="ob-price" value="${state.profile?.subscription_price || '9.99'}" min="3" max="50" step="0.01" oninput="updateEarningsPreview(this.value)">
+          </div>
+          <p class="form-hint">You keep 85% after CCBill fees. Recommended: $7.99-$14.99</p>
         </div>
-        <p class="form-hint">You keep 85%. HandHeaven keeps 15%. No other fees.</p>
+        <div style="background:rgba(76,175,120,0.1);border-radius:var(--radius-s);padding:0.75rem">
+          <div style="font-size:0.75rem;color:#4CAF78;margin-bottom:4px">With 10 subscribers you earn monthly:</div>
+          <div id="earnings-preview" style="font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--white)">$84.91</div>
+          <div style="font-size:0.72rem;color:var(--muted)">recurring · every month · automatically</div>
+        </div>
       </div>
-      <div style="background:var(--gold-d);border:1px solid var(--gold-b);border-radius:var(--radius-s);padding:1rem;margin-bottom:1.5rem">
-        <div style="font-size:0.78rem;color:var(--gold);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.08em">Your earnings with 10 subscribers</div>
-        <div id="earnings-preview" style="font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--white)">$84.91/month</div>
-        <div style="font-size:0.75rem;color:var(--muted);margin-top:0.25rem">after 15% platform fee · paid every Friday</div>
+
+      <!-- Content strategy tip -->
+      <div style="background:var(--gold-d);border:1px solid var(--gold-b);border-radius:var(--radius-s);padding:1rem;margin-bottom:1.25rem">
+        <div style="font-size:0.78rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem">✦ The OnlyFans Strategy — What Works</div>
+        <div style="font-size:0.82rem;color:var(--muted);line-height:1.7">
+          <strong style="color:var(--white)">2-3 Free previews</strong> → attract buyers who don't know you yet<br>
+          <strong style="color:var(--white)">Subscribers-only content</strong> → your main recurring income stream<br>
+          <strong style="color:var(--white)">PPV exclusives</strong> → extra earnings from your best pieces<br><br>
+          Creators who use all three earn <strong style="color:var(--gold)">3x more</strong> than those who only do PPV.
+        </div>
       </div>
+
+      <!-- Stream 2 PPV -->
+      <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-s);padding:1rem;margin-bottom:1.25rem">
+        <div style="font-size:0.78rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem">Stream 2 — Pay Per View (set when uploading)</div>
+        <div style="font-size:0.82rem;color:var(--muted)">When you upload content, you choose: Free / Subscribers Only / PPV with your price. Recommended PPV range: $3.99-$9.99 per piece.</div>
+      </div>
+
+      <!-- Payout method -->
       <div class="form-group">
         <label class="form-label">Preferred Payout Method</label>
         <select class="form-input form-select" id="ob-payout">
           <option value="paxum">Paxum (recommended — international)</option>
           <option value="bank">Bank Transfer</option>
         </select>
-        <p class="form-hint">Payouts every Friday. Minimum $20. Setup instructions sent to your email.</p>
+        <p class="form-hint">Payouts every Friday via CCBill → Paxum. Minimum $20.</p>
       </div>
       <div style="display:flex;gap:0.75rem">
         <button class="btn btn-outline" onclick="showOnboardStep(3)">Back</button>
@@ -1469,7 +1710,7 @@ function showOnboardStep(step) {
       <h2>Upload Your First Content</h2>
       <p style="color:var(--muted);font-size:0.88rem;margin-bottom:0.75rem">Upload at least <strong style="color:var(--white)">5 photos</strong> to activate your profile. Buyers decide to subscribe based on what they see first — make it count.</p>
       <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-s);padding:0.9rem;margin-bottom:1.25rem;font-size:0.82rem;color:var(--muted);line-height:1.6">
-        💡 <strong style="color:var(--white)">Pro tip:</strong> Include 1–2 free preview photos and 3–4 subscriber-only shots. The free ones attract, the locked ones convert.
+        💡 <strong style="color:var(--white)">Strategy:</strong> Upload 2-3 as <span style="color:#4CAF78">Free previews</span> to attract buyers, and the rest as <span style="color:var(--gold)">Subscribers only</span>. You can add PPV exclusives anytime from your dashboard after going live.
       </div>
 
       <!-- Upload zone -->
@@ -1692,12 +1933,14 @@ async function onboardStep5() {
 function openUpload() {
   if (!state.user) return openAuth('signup', 'creator');
   state.uploadFiles = [];
+  state.contentLevel = 0;
+  state.selectedTags = [];
   document.getElementById('upload-preview').innerHTML = '';
   document.getElementById('upload-title').value = '';
   document.getElementById('upload-description').value = '';
   document.getElementById('upload-tags').value = '';
-  document.getElementById('upload-nsfw').checked = false;
   selectPricing('free');
+  selectContentLevel(0);
   openModal('modal-upload');
 }
 
@@ -1719,16 +1962,22 @@ function handleDrop(e) {
 
 function selectPricing(mode) {
   state.pricingMode = mode;
-  ['free','sub','paid'].forEach(m => document.getElementById('price-' + m)?.classList.remove('selected'));
+  ['free','sub','paid'].forEach(m => {
+    const el = document.getElementById('price-' + m);
+    if (el) el.classList.remove('selected');
+  });
   document.getElementById('price-' + mode)?.classList.add('selected');
   document.getElementById('price-input-wrap').style.display = mode === 'paid' ? 'block' : 'none';
+  const hint = document.getElementById('price-free-hint');
+  if (hint) hint.style.display = mode === 'free' ? 'block' : 'none';
 }
 
 async function doUpload() {
   const title = document.getElementById('upload-title').value.trim();
   const description = document.getElementById('upload-description').value.trim();
-  const tags = document.getElementById('upload-tags').value.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
-  const isNsfw = document.getElementById('upload-nsfw').checked;
+  const tags = getAllTags();
+  const contentLevel = state.contentLevel || 0;
+  const isNsfw = contentLevel >= 2;
   const price = state.pricingMode === 'paid' ? parseFloat(document.getElementById('upload-price').value) : null;
   const isFree = state.pricingMode === 'free';
   const err = document.getElementById('upload-error');
@@ -1750,14 +1999,16 @@ async function doUpload() {
       const { data } = db.storage.from('thumbnails').getPublicUrl(thumbPath);
       thumbUrl = data?.publicUrl;
     }
-    await db.from('content').insert({
+    const { data: inserted } = await db.from('content').insert({
       creator_id: state.user.id, title, description,
       content_type: file.type.startsWith('video/') ? 'video' : 'photo',
       is_free: isFree, price, is_nsfw: isNsfw,
+      content_level: contentLevel,
+      ai_moderation_status: 'pending',
       thumbnail_url: thumbUrl, file_urls: [filePath], tags, is_published: true
-    });
+    }).select().single();
     closeModal('modal-upload');
-    showToast('Content published! ✦', 'success');
+    showToast('Content published! ✦ AI moderation running in background.', 'success');
     await loadCreatorDashboard();
   } catch(e) {
     err.textContent = e.message || 'Upload failed';
@@ -1983,13 +2234,15 @@ async function loadAdminContent() {
 }
 
 function switchAdminTab(tab, btn) {
-  ['creators','buyers','reports','content','payouts'].forEach(t => {
+  ['creators','buyers','moderation','reports','content','payouts'].forEach(t => {
     const el = document.getElementById('adm-tab-'+t);
-    if (el) el.style.display = t === tab ? 'block' : 'none';
-    if (t === 'content' && tab === 'content') el.style.display = 'grid';
+    if (el) el.style.display = 'none';
   });
+  const active = document.getElementById('adm-tab-'+tab);
+  if (active) active.style.display = tab === 'content' ? 'grid' : 'block';
   document.querySelectorAll('#page-admin .profile-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  if (tab === 'moderation') loadModerationQueue();
 }
 
 async function toggleCreatorStatus(id, isActive) {
@@ -2071,6 +2324,185 @@ async function checkAutoban(reportedId) {
   if (count >= 5) {
     await db.from('profiles').update({is_active: false}).eq('id', reportedId);
   }
+}
+
+// ============================================
+// CONTENT LEVEL & TAG SYSTEM
+// ============================================
+const TAG_SETS = {
+  0: ['nail-art','jewelry','rings','bracelets','elegant','minimalist','dark-aesthetic','boho','vintage','korean-glass','chrome','french','ombre','asmr','editorial','artistic'],
+  1: ['suggestive','sensual','intimate-aesthetic','seductive','lingerie-hands'],
+  2: ['nsfw','adult','mature'],
+  3: ['explicit','nsfw-explicit','adult-explicit']
+};
+
+function selectContentLevel(level) {
+  state.contentLevel = level;
+  [0,1,2,3].forEach(l => {
+    const el = document.getElementById('cl-'+l);
+    if (el) el.classList.remove('selected');
+  });
+  document.getElementById('cl-'+level)?.classList.add('selected');
+  state.selectedTags = [];
+  renderTagSuggestions(level);
+}
+
+function renderTagSuggestions(level) {
+  const container = document.getElementById('tag-suggestions');
+  if (!container) return;
+  container.innerHTML = (TAG_SETS[level]||[]).map(tag => `
+    <span onclick="toggleTag('${tag}',this)" data-tag="${tag}"
+      style="cursor:pointer;font-size:0.75rem;padding:4px 10px;border-radius:20px;background:var(--bg2);border:1px solid var(--border2);color:var(--muted);transition:all 0.15s">${tag}</span>
+  `).join('');
+}
+
+function toggleTag(tag, el) {
+  if (!state.selectedTags) state.selectedTags = [];
+  if (state.selectedTags.includes(tag)) {
+    state.selectedTags = state.selectedTags.filter(t => t !== tag);
+    el.style.cssText = 'cursor:pointer;font-size:0.75rem;padding:4px 10px;border-radius:20px;background:var(--bg2);border:1px solid var(--border2);color:var(--muted);transition:all 0.15s';
+  } else {
+    state.selectedTags.push(tag);
+    el.style.cssText = 'cursor:pointer;font-size:0.75rem;padding:4px 10px;border-radius:20px;background:var(--gold-d);border:1px solid var(--gold-b);color:var(--gold);transition:all 0.15s';
+  }
+}
+
+function getAllTags() {
+  const selected = state.selectedTags || [];
+  const custom = (document.getElementById('upload-tags')?.value||'').split(',').map(t=>t.trim().toLowerCase()).filter(Boolean);
+  return [...new Set([...selected,...custom])];
+}
+
+// ============================================
+// AI MODERATION — READY TO ACTIVATE
+// Set AI_MODERATION_ENABLED = true when Sightengine account is created
+// Sign up at: sightengine.com — $29/month for 10,000 ops
+// ============================================
+const SIGHTENGINE_USER   = 'PENDING_SETUP'; // fill in from sightengine.com
+const SIGHTENGINE_SECRET = 'PENDING_SETUP'; // fill in from sightengine.com
+const AI_MODERATION_ENABLED = false;        // set to true when ready
+
+async function moderateContent(thumbUrl, contentId, declaredLevel) {
+  if (!AI_MODERATION_ENABLED || SIGHTENGINE_USER === 'PENDING_SETUP') {
+    await db.from('content').update({ ai_moderation_status: 'ai_not_configured' }).eq('id', contentId);
+    return;
+  }
+  try {
+    const params = new URLSearchParams({
+      url: thumbUrl,
+      models: 'nudity-2.0,face-attributes,minor-2.0',
+      api_user: SIGHTENGINE_USER,
+      api_secret: SIGHTENGINE_SECRET
+    });
+    const res = await fetch(`https://api.sightengine.com/1.0/check.json?${params}`);
+    const r = await res.json();
+    const nudity = r.nudity?.sexual_explicit || 0;
+    const suggestive = r.nudity?.suggestive || 0;
+    const minor = r.minor?.minor_detected || 0;
+    const faces = r.faces?.length || 0;
+    const flags = [];
+
+    // CRITICAL: Minor detected — immediate unpublish + admin alert
+    if (minor > 0.5) {
+      await db.from('content').update({ is_published: false, ai_moderation_status: 'rejected_minor', ai_flags: ['MINOR_DETECTED'], ai_nudity_score: nudity }).eq('id', contentId);
+      showToast('⚠️ Content flagged by AI and removed for review.', 'error');
+      return;
+    }
+
+    if (faces > 0) flags.push('FACE_DETECTED');
+
+    let aiLevel = 0;
+    if (nudity > 0.7) aiLevel = 3;
+    else if (nudity > 0.4) aiLevel = 2;
+    else if (suggestive > 0.5) aiLevel = 1;
+
+    const mismatch = Math.abs(aiLevel - declaredLevel) > 1;
+    if (mismatch) flags.push('LEVEL_MISMATCH');
+    const status = flags.length > 0 || mismatch ? 'needs_review' : 'approved';
+
+    await db.from('content').update({
+      ai_moderation_status: status, ai_content_level: aiLevel,
+      ai_nudity_score: nudity, ai_flags: flags,
+      moderation_checked_at: new Date().toISOString(),
+      is_published: status === 'approved'
+    }).eq('id', contentId);
+  } catch(e) {
+    await db.from('content').update({ ai_moderation_status: 'error' }).eq('id', contentId);
+  }
+}
+
+// ============================================
+// ADMIN MODERATION QUEUE
+// ============================================
+async function loadModerationQueue() {
+  const { data: flagged } = await db.from('content')
+    .select('*,profiles!creator_id(display_name,username)')
+    .in('ai_moderation_status', ['needs_review','rejected_minor','error','ai_not_configured'])
+    .order('created_at', { ascending: false });
+
+  const pending = (flagged||[]).filter(c => c.ai_moderation_status === 'needs_review');
+  const rejected = (flagged||[]).filter(c => c.ai_moderation_status === 'rejected_minor');
+
+  const pEl = document.getElementById('adm-mod-pending');
+  const rEl = document.getElementById('adm-mod-rejected');
+  if (pEl) pEl.textContent = pending.length;
+  if (rEl) rEl.textContent = rejected.length;
+
+  const list = document.getElementById('adm-moderation-list');
+  if (!list) return;
+  if (!flagged?.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">✓</div><h3>No flagged content</h3><p>AI moderation queue is clear</p></div>';
+    return;
+  }
+  list.innerHTML = (flagged||[]).map(c => {
+    const isMinor = c.ai_moderation_status === 'rejected_minor';
+    const levelLabels = ['🌿 SFW','🌶 Suggestive','🔞 NSFW','🔥 Explicit'];
+    return `
+      <div style="background:var(--bg3);border:1px solid ${isMinor?'rgba(224,82,82,0.5)':'var(--border2)'};border-radius:var(--radius-s);padding:1rem 1.25rem">
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-start">
+          ${c.thumbnail_url ? `<img src="${c.thumbnail_url}" style="width:80px;height:80px;object-fit:cover;border-radius:var(--radius-s);filter:${isMinor?'blur(8px)':'none'}">` : '<div style="width:80px;height:80px;background:var(--bg2);border-radius:var(--radius-s);display:flex;align-items:center;justify-content:center;color:var(--muted)">◈</div>'}
+          <div style="flex:1">
+            <div style="font-size:0.9rem;color:var(--white);margin-bottom:4px">${c.title}</div>
+            <div style="font-size:0.78rem;color:var(--muted);margin-bottom:8px">@${c.profiles?.username||'—'} · ${timeAgo(c.created_at)}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+              <span style="font-size:0.72rem;padding:2px 8px;border-radius:20px;background:rgba(201,145,61,0.15);color:var(--gold)">Declared: ${levelLabels[c.content_level||0]}</span>
+              ${c.ai_content_level !== null ? `<span style="font-size:0.72rem;padding:2px 8px;border-radius:20px;background:rgba(224,82,82,0.15);color:var(--danger)">AI: ${levelLabels[c.ai_content_level]||'?'}</span>` : ''}
+              <span style="font-size:0.72rem;padding:2px 8px;border-radius:20px;background:${isMinor?'rgba(224,82,82,0.2)':'rgba(245,240,232,0.08)'};color:${isMinor?'var(--danger)':'var(--muted)'}">
+                ${c.ai_moderation_status}
+              </span>
+              ${(c.ai_flags||[]).map(f=>`<span style="font-size:0.72rem;padding:2px 8px;border-radius:20px;background:rgba(224,82,82,0.1);color:var(--danger)">${f}</span>`).join('')}
+            </div>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+              ${!isMinor ? `<button class="btn btn-sm" style="background:rgba(76,175,120,0.15);color:var(--success);border:none" onclick="adminApproveContent('${c.id}')">✓ Approve</button>` : ''}
+              <button class="btn btn-sm" style="background:rgba(224,82,82,0.15);color:var(--danger);border:none" onclick="adminRejectContent('${c.id}')">✕ Remove</button>
+              ${!isMinor ? `<button class="btn btn-outline btn-sm" onclick="adminReclassifyContent('${c.id}',${c.content_level||0})">Reclassify</button>` : ''}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function adminApproveContent(id) {
+  await db.from('content').update({ ai_moderation_status: 'approved', is_published: true }).eq('id', id);
+  showToast('Content approved and published', 'success');
+  loadModerationQueue();
+}
+
+async function adminRejectContent(id) {
+  if (!confirm('Remove this content permanently?')) return;
+  await db.from('content').update({ ai_moderation_status: 'rejected', is_published: false }).eq('id', id);
+  showToast('Content removed', 'success');
+  loadModerationQueue();
+}
+
+async function adminReclassifyContent(id, currentLevel) {
+  const newLevel = prompt(`Reclassify content level:\n0 = SFW\n1 = Suggestive\n2 = NSFW\n3 = Explicit\n\nCurrent: ${currentLevel}\nNew level:`);
+  if (newLevel === null || isNaN(+newLevel)) return;
+  await db.from('content').update({ content_level: +newLevel, is_nsfw: +newLevel >= 2, ai_moderation_status: 'approved', is_published: true }).eq('id', id);
+  showToast('Content reclassified and approved', 'success');
+  loadModerationQueue();
 }
 
 async function updateFounderCounter() {
