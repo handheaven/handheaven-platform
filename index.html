@@ -1218,8 +1218,11 @@ async function obsStep2() {
   if(!name){err.textContent='Display name is required.';err.style.display='block';return;}
   if(!username||username.length<3){err.textContent='Username must be at least 3 characters.';err.style.display='block';return;}
   if(!/^[a-z0-9_]+$/.test(username)){err.textContent='Username: letters, numbers and underscores only.';err.style.display='block';return;}
-  const {data:ex}=await db.from('profiles').select('id').eq('username',username).neq('id',S.user.id).single();
-  if(ex){err.textContent='This username is taken.';err.style.display='block';return;}
+  // Check username availability — mayfail if no row found, that's OK
+  try {
+    const {data:ex}=await db.from('profiles').select('id').eq('username',username).neq('id',S.user.id).single();
+    if(ex){err.textContent='This username is taken. Please choose another.';err.style.display='block';return;}
+  } catch(e){ /* No existing user found — username is available */ }
   await db.from('profiles').update({display_name:name,username,bio,updated_at:new Date().toISOString()}).eq('id',S.user.id);
   S.profile={...S.profile,display_name:name,username,bio};
   showObs(3);
