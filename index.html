@@ -1267,6 +1267,19 @@ async function goLive() {
     await db.from('profiles').update({is_onboarded:true,updated_at:new Date().toISOString()}).eq('id',S.user.id);
     const {data}=await db.from('profiles').select('*').eq('id',S.user.id).single();
     S.profile=data;updateNav();
+    // Send welcome email to creator + notify admin
+    try {
+      await fetch(SURL+'/functions/v1/swift-service',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+SKEY},
+        body:JSON.stringify({
+          type:'welcome',
+          username:S.profile.username||'creator',
+          email:S.user.email,
+          name:S.profile.display_name||S.profile.username||'Creator'
+        })
+      });
+    } catch(e){}
     showToast('Welcome to HandHeaven ✦ You\'re live!','success');
     navigate('creator-dashboard');
   } catch(e){err.textContent=e.message||'Error going live.';err.style.display='block';btn.disabled=false;btn.textContent='Go Live Now ✦';}
