@@ -1155,8 +1155,11 @@ function updateNav() {
   }
 }
 
-function getInitials(name = '') {
-  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?';
+function getInitials(name) {
+  if (!name || typeof name !== 'string') return '?';
+  const clean = String(name).trim();
+  if (!clean) return '?';
+  return clean.split(' ').filter(Boolean).map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?';
 }
 
 function toggleDropdown() {
@@ -1185,27 +1188,31 @@ async function loadCreators(search = '') {
 
 function renderCreators(creators) {
   const grid = document.getElementById('creator-grid');
-  if (!creators.length) {
+  if (!creators || !creators.length) {
     grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">◈</div><h3>No creators yet</h3><p>Be the first to join HandHeaven</p><button class="btn btn-gold" style="margin-top:1rem" onclick="openAuth('signup','creator')">Join as Creator</button></div>`;
     return;
   }
-  grid.innerHTML = creators.map(c => `
-    <div class="creator-card" onclick="navigate('profile',{username:'${c.username || c.id}'})">
-      <div class="creator-cover">
-        ${c.cover_url ? `<img src="${c.cover_url}" alt="">` : '<div class="creator-cover-placeholder">✦</div>'}
-        <div class="creator-avatar">${c.avatar_url ? `<img src="${c.avatar_url}">` : getInitials(c.display_name)}</div>
-      </div>
-      <div class="creator-card-body">
-        <div class="creator-name">${c.display_name || c.username || 'Creator'} ${c.is_verified ? '<span class="verified-badge">✦</span>' : ''}</div>
-        ${c.bio ? `<div class="creator-bio">${c.bio}</div>` : ''}
-        ${c.tags?.length ? `<div class="creator-tags">${c.tags.slice(0,3).map(t => `<span class="tag">${t}</span>`).join('')}</div>` : ''}
-        <div class="creator-meta">
-          <div class="creator-price">${c.subscription_price ? `$${parseFloat(c.subscription_price).toFixed(2)}<span>/month</span>` : '<span>Free preview</span>'}</div>
-          <div class="creator-subs">${c.subscriber_count || 0} subscribers</div>
+  grid.innerHTML = creators.map(c => {
+    const name = c.display_name || c.username || 'Creator';
+    const initials = getInitials(name);
+    return `
+      <div class="creator-card" onclick="navigate('profile',{username:'${c.username || c.id}'})">
+        <div class="creator-cover">
+          ${c.cover_url ? `<img src="${c.cover_url}" alt="">` : '<div class="creator-cover-placeholder">✦</div>'}
+          <div class="creator-avatar">${c.avatar_url ? `<img src="${c.avatar_url}">` : initials}</div>
+        </div>
+        <div class="creator-card-body">
+          <div class="creator-name">${name} ${c.is_verified ? '<span class="verified-badge">✦</span>' : ''}</div>
+          ${c.bio ? `<div class="creator-bio">${c.bio}</div>` : ''}
+          ${c.tags?.length ? `<div class="creator-tags">${c.tags.slice(0,3).map(t => `<span class="tag">${t}</span>`).join('')}</div>` : ''}
+          <div class="creator-meta">
+            <div class="creator-price">${c.subscription_price ? `$${parseFloat(c.subscription_price).toFixed(2)}<span>/month</span>` : '<span>Free preview</span>'}</div>
+            <div class="creator-subs">${c.subscriber_count || 0} subscribers</div>
+          </div>
         </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function filterCreators(tag, btn) {
@@ -2646,6 +2653,13 @@ async function updateFounderCounter() {
 if (window.location.hash === '#join') {
   window.addEventListener('load', () => {
     setTimeout(() => openAuth('signup', 'creator'), 800);
+  });
+}
+
+// Auto-open admin panel from email link
+if (window.location.hash === '#admin') {
+  window.addEventListener('load', () => {
+    setTimeout(() => navigate('admin'), 800);
   });
 }
 
