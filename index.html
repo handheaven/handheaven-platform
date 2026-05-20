@@ -1630,6 +1630,21 @@ async function doSignup() {
     if (error) throw error;
     if (data.user) {
       await db.from('profiles').upsert({ id: data.user.id, role: state.selectedRole, username, display_name: username });
+      // Notify Munir via secure Edge Function — API key never exposed in frontend
+      if (state.selectedRole === 'creator') {
+        try {
+          await fetch('https://cjqggmzalhocfoxwfjpq.supabase.co/functions/v1/notify-creator-signup', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNqcWdnbXphbGhvY2ZveHdmanBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MzAzMTEsImV4cCI6MjA5NDEwNjMxMX0.V4p9pDTjOAxzQim9DXebphi7U5_djKBxIlaOe8wQT8U'
+            },
+            body: JSON.stringify({ username, email })
+          });
+        } catch(e) {
+          console.log('Notification failed silently:', e.message);
+        }
+      }
     }
     closeModal('modal-auth');
     showEmailConfirmBanner(email);
