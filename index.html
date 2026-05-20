@@ -1633,7 +1633,7 @@ async function doSignup() {
       // Notify Munir via secure Edge Function — API key never exposed in frontend
       if (state.selectedRole === 'creator') {
         try {
-          await fetch('https://cjqggmzalhocfoxwfjpq.supabase.co/functions/v1/notify-creator-signup', {
+          await fetch('https://cjqggmzalhocfoxwfjpq.supabase.co/functions/v1/swift-service', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
