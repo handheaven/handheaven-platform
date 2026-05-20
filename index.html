@@ -304,17 +304,11 @@ footer a:hover{color:var(--gold)}
   <div class="age-gate-box">
     <div class="age-gate-logo">Hand<span>Heaven</span></div>
     <h2 style="font-size:1.4rem;margin-bottom:0.5rem">Adults only</h2>
-    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1.5rem;line-height:1.7">This platform contains content for adults 18+. Please confirm your age to continue.</p>
+    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:2rem;line-height:1.7">This platform contains content intended for adults 18 and older.</p>
     <div style="display:flex;flex-direction:column;gap:0.75rem">
-      <label class="form-label" style="text-align:left">Date of birth</label>
-      <div class="age-gate-dob">
-        <select class="form-input" id="ag-month" style="appearance:auto"><option value="">Month</option><option>January</option><option>February</option><option>March</option><option>April</option><option>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option></select>
-        <select class="form-input" id="ag-day" style="appearance:auto"><option value="">Day</option></select>
-        <select class="form-input" id="ag-year" style="appearance:auto"><option value="">Year</option></select>
-      </div>
-      <div class="age-error" id="ag-error"></div>
-      <div class="age-check-wrap"><input type="checkbox" id="ag-terms"><label for="ag-terms">I confirm I am 18+ and agree to the <a href="#" style="color:var(--gold)">Terms</a> and <a href="#" style="color:var(--gold)">Privacy Policy</a></label></div>
-      <button class="btn btn-gold btn-full" onclick="verifyAge()">Enter HandHeaven</button>
+      <div class="age-check-wrap"><input type="checkbox" id="ag-terms" style="margin-top:3px;accent-color:var(--gold)"><label for="ag-terms">I confirm I am 18 or older and agree to the <a href="#" style="color:var(--gold)">Terms of Service</a> and <a href="#" style="color:var(--gold)">Privacy Policy</a></label></div>
+      <div id="ag-error" style="color:var(--danger);font-size:0.8rem;display:none"></div>
+      <button class="btn btn-gold btn-full" onclick="verifyAge()">I confirm I am 18+ — Enter HandHeaven</button>
     </div>
   </div>
 </div>
@@ -463,7 +457,7 @@ footer a:hover{color:var(--gold)}
   <div id="dt-payouts" class="dash-section">
     <div class="card card-gold" style="max-width:400px;margin-bottom:1.5rem">
       <div class="stat-label">Available for payout</div>
-      <div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold);margin:0.5rem 0" id="cd-payout-bal">$0.00</div>
+      <div style="font-family:Playfair Display,serif;font-size:2rem;color:var(--gold);margin:0.5rem 0" id="cd-payout-bal">$0.00</div>
       <div style="font-size:0.78rem;color:var(--muted);margin-bottom:1rem">Minimum $20 · Paid via Paxum every Friday</div>
       <button class="btn btn-gold btn-full" onclick="reqPayout()">Request Payout</button>
     </div>
@@ -530,7 +524,7 @@ footer a:hover{color:var(--gold)}
       <div style="background:rgba(76,175,120,0.08);border:1px solid rgba(76,175,120,0.2);border-radius:var(--radius-s);padding:1rem;margin-bottom:1rem">
         <div style="font-size:0.72rem;color:var(--success);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.6rem">Monthly Subscription Price</div>
         <div class="form-group" style="margin-bottom:0.75rem"><div class="input-prefix"><span>$</span><input class="form-input" type="number" id="ob-price" value="9.99" min="3" max="50" step="0.01" oninput="updEarnings(this.value)"></div><p class="form-hint">You keep 85% after processing fees</p></div>
-        <div style="background:rgba(76,175,120,0.1);border-radius:var(--radius-s);padding:0.75rem"><div style="font-size:0.72rem;color:var(--success);margin-bottom:3px">With 10 subscribers you earn:</div><div style="font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--white)" id="ob-earn-prev">$84.91</div><div style="font-size:0.7rem;color:var(--muted)">recurring · every month</div></div>
+        <div style="background:rgba(76,175,120,0.1);border-radius:var(--radius-s);padding:0.75rem"><div style="font-size:0.72rem;color:var(--success);margin-bottom:3px">With 10 subscribers you earn:</div><div style="font-family:Playfair Display,serif;font-size:1.6rem;color:var(--white)" id="ob-earn-prev">$84.91</div><div style="font-size:0.7rem;color:var(--muted)">recurring · every month</div></div>
       </div>
       <div class="info-box" style="margin-bottom:1rem"><strong>✦ The strategy that works:</strong><br>2-3 <span style="color:var(--success)">free previews</span> → attract buyers<br>Most content → <span style="color:var(--gold)">subscribers only</span> → recurring income<br>Best pieces → PPV → extra earnings</div>
       <div class="form-group"><label class="form-label">Payout method</label><select class="form-input" id="ob-payout" style="appearance:auto"><option value="paxum">Paxum (recommended)</option><option value="bank">Bank transfer</option></select></div>
@@ -603,7 +597,7 @@ footer a:hover{color:var(--gold)}
       </div>
       <div style="background:var(--gold-d);border:1px solid var(--gold-b);border-radius:var(--radius-s);padding:1rem;display:flex;justify-content:space-between;align-items:center">
         <span style="font-size:0.82rem;color:var(--gold)">Total HandHeaven Revenue</span>
-        <span style="font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--gold)" id="adm-total">$0.00</span>
+        <span style="font-family:Playfair Display,serif;font-size:1.6rem;color:var(--gold)" id="adm-total">$0.00</span>
       </div>
     </div>
     <div class="dash-nav" style="padding:0;margin-bottom:1.5rem">
@@ -732,39 +726,6 @@ const S = {
 // ============================================
 // AGE GATE
 // ============================================
-function initAgeGate() {
-  // Clear old session key if it exists from previous test
-  const verified = sessionStorage.getItem('hh-age');
-  if (verified) { document.getElementById('age-gate').style.display='none'; return; }
-  const dayEl = document.getElementById('ag-day');
-  const yearEl = document.getElementById('ag-year');
-  if (!dayEl || !yearEl) return;
-  // Populate days
-  for (let i = 1; i <= 31; i++) {
-    const o = document.createElement('option');
-    o.value = i; o.textContent = i;
-    dayEl.appendChild(o);
-  }
-  // Populate years (18+ only)
-  const yr = new Date().getFullYear();
-  for (let i = yr - 18; i >= yr - 100; i--) {
-    const o = document.createElement('option');
-    o.value = i; o.textContent = i;
-    yearEl.appendChild(o);
-  }
-}
-function verifyAge() {
-  const m=document.getElementById('ag-month').value, d=document.getElementById('ag-day').value, y=document.getElementById('ag-year').value;
-  const t=document.getElementById('ag-terms').checked, e=document.getElementById('ag-error');
-  e.style.display='none';
-  if(!m||!d||!y){e.textContent='Please enter your full date of birth.';e.style.display='block';return;}
-  if(!t){e.textContent='You must agree to the Terms to continue.';e.style.display='block';return;}
-  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const dob=new Date(parseInt(y),months.indexOf(m),parseInt(d));
-  if((new Date()-dob)/(365.25*24*60*60*1000)<18){e.textContent='You must be 18+ to access HandHeaven.';e.style.display='block';return;}
-  sessionStorage.setItem('hh-age','1');
-  document.getElementById('age-gate').style.display='none';
-}
 
 // ============================================
 // NAV
@@ -902,11 +863,11 @@ async function loadCreators(search='') {
 }
 function renderCreators(list) {
   const grid=document.getElementById('creator-grid');
-  if(!list?.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">◈</div><h3>No creators yet</h3><p>Be the first founding creator — $0 forever</p><button class="btn btn-gold" style="margin-top:1rem" onclick="openAuth('signup','creator')">Join as Creator ✦</button></div>';return;}
+  if(!list?.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">◈</div><h3>No creators yet</h3><p>Be the first founding creator — $0 forever</p><button class="btn btn-gold" style="margin-top:1rem" onclick="openAuth(\'signup\',\'creator\')">Join as Creator ✦</button></div>';return;}
   grid.innerHTML=list.map(c=>{
     const name=c.display_name||c.username||'Creator';
     const tb=c.founder_tier===1?'<span class="badge badge-tier1" style="margin-bottom:0.35rem;display:inline-flex">⭐ Founding</span>':c.founder_tier===2?'<span class="badge badge-tier2" style="margin-bottom:0.35rem;display:inline-flex">✦ Early Adopter</span>':'';
-    return '<div class="creator-card" onclick="navigate('profile',{username:''+esc(c.username||c.id)+''})">'
+    return '<div class="creator-card" onclick="navigate(\'profile\',{username:\''+esc(c.username||c.id)+'\'})">'
       +'<div class="creator-cover">'+(c.cover_url?'<img src="'+esc(c.cover_url)+'" alt="">':'<div class="creator-cover-bg">✦</div>')
       +'<div class="creator-avatar">'+(c.avatar_url?'<img src="'+esc(c.avatar_url)+'">':getInitials(name))+'</div></div>'
       +'<div class="creator-card-body">'
@@ -1026,20 +987,20 @@ function openSubModal(creatorId) {
   const name=c.display_name||c.username||'Creator';
   document.getElementById('sub-title').textContent='Subscribe to '+name;
   document.getElementById('sub-body').innerHTML=
-    '<div style="text-align:center;margin-bottom:1.25rem"><div style="font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--gold)">$'+price+'<span style="font-size:1rem;color:var(--muted);font-family:'DM Sans',sans-serif">/month</span></div></div>'
+    '<div style="text-align:center;margin-bottom:1.25rem"><div style="font-family:Playfair Display,serif;font-size:2.5rem;color:var(--gold)">$'+price+'<span style="font-size:1rem;color:var(--muted);font-family:DM Sans,sans-serif">/month</span></div></div>'
     +'<div class="info-box" style="margin-bottom:1.25rem">🔒 Payment via <strong>CCBill</strong> — launching soon.<br><br>✦ Instant access to all exclusive content<br>✦ Every new post automatically unlocked<br>✦ Cancel anytime</div>'
-    +'<button class="btn btn-gold btn-full" onclick="closeModal('modal-sub');showToast('CCBill integration coming soon. You will be notified when payments go live ✦','success')">Coming Soon — Get Notified</button>'
-    +'<button class="btn btn-ghost btn-full btn-sm" style="margin-top:0.5rem" onclick="closeModal('modal-sub')">Cancel</button>';
+    +'<button class="btn btn-gold btn-full" onclick="closeModal(\'modal-sub\');showToast(\'CCBill integration coming soon. You will be notified when payments go live ✦\',\'success\')">Coming Soon — Get Notified</button>'
+    +'<button class="btn btn-ghost btn-full btn-sm" style="margin-top:0.5rem" onclick="closeModal(\'modal-sub\')">Cancel</button>';
   openModal('modal-sub');
 }
 function openPPVModal(contentId) {
   if(!S.user){openAuth('signup','buyer');return;}
   const c=S.viewContent.find(x=>x.id===contentId);if(!c)return;
   document.getElementById('ppv-body').innerHTML=
-    '<div style="text-align:center;margin-bottom:1rem"><div style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:0.5rem">'+esc(c.title)+'</div><div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold)">$'+parseFloat(c.price).toFixed(2)+'<span style="font-size:0.9rem;color:var(--muted);font-family:'DM Sans',sans-serif"> one-time</span></div></div>'
+    '<div style="text-align:center;margin-bottom:1rem"><div style="font-family:Playfair Display,serif;font-size:1.1rem;margin-bottom:0.5rem">'+esc(c.title)+'</div><div style="font-family:Playfair Display,serif;font-size:2rem;color:var(--gold)">$'+parseFloat(c.price).toFixed(2)+'<span style="font-size:0.9rem;color:var(--muted);font-family:DM Sans,sans-serif"> one-time</span></div></div>'
     +'<div style="font-size:0.82rem;color:var(--muted);text-align:center;margin-bottom:1.25rem">Exclusive PPV content. One-time payment. Yours forever.</div>'
-    +'<button class="btn btn-gold btn-full" onclick="closeModal('modal-ppv');showToast('CCBill integration coming soon ✦','success')">Coming Soon — Get Notified</button>'
-    +'<button class="btn btn-ghost btn-full btn-sm" style="margin-top:0.5rem" onclick="closeModal('modal-ppv')">Cancel</button>';
+    +'<button class="btn btn-gold btn-full" onclick="closeModal(\'modal-ppv\');showToast(\'CCBill integration coming soon ✦\',\'success\')">Coming Soon — Get Notified</button>'
+    +'<button class="btn btn-ghost btn-full btn-sm" style="margin-top:0.5rem" onclick="closeModal(\'modal-ppv\')">Cancel</button>';
   openModal('modal-ppv');
 }
 async function cancelSub(creatorId) {
@@ -1095,7 +1056,7 @@ function renderDashContent() {
   list.innerHTML=S.myContent.map(c=>{
     const tc=c.is_free?'var(--success)':c.price?'var(--gold)':'var(--muted)';
     const tl=c.is_free?'🔓 Free':c.price?'💰 $'+parseFloat(c.price).toFixed(2)+' PPV':'🔒 Subscribers';
-    return '<div class="content-row"><div class="row-thumb">'+(c.thumbnail_url?'<img src="'+esc(c.thumbnail_url)+'">':'◈')+'</div><div class="row-info"><div class="row-title">'+esc(c.title)+'</div><div class="row-meta"><span style="color:'+tc+';font-weight:500">'+tl+'</span><span>'+(c.view_count||0)+' views · '+timeAgo(c.created_at)+'</span></div></div><div class="row-actions"><button class="btn btn-danger btn-sm" onclick="delContent(''+c.id+'')">Delete</button></div></div>';
+    return '<div class="content-row"><div class="row-thumb">'+(c.thumbnail_url?'<img src="'+esc(c.thumbnail_url)+'">':'◈')+'</div><div class="row-info"><div class="row-title">'+esc(c.title)+'</div><div class="row-meta"><span style="color:'+tc+';font-weight:500">'+tl+'</span><span>'+(c.view_count||0)+' views · '+timeAgo(c.created_at)+'</span></div></div><div class="row-actions"><button class="btn btn-danger btn-sm" onclick="delContent(\''+c.id+'\')"">Delete</button></div></div>';
   }).join('');
 }
 function switchDashTab(tab, btn) {
@@ -1137,11 +1098,11 @@ async function loadBuyerDash() {
   if(!S.user) return;
   const {data:subs}=await db.from('subscriptions').select('*,creator:creator_id(display_name,username,avatar_url,subscription_price)').eq('buyer_id',S.user.id).eq('status','active');
   const sl=document.getElementById('bd-subs-list');
-  if(!subs?.length){sl.innerHTML='<div class="empty"><div class="empty-icon">◈</div><h3>No active subscriptions</h3><button class="btn btn-gold btn-sm" style="margin-top:1rem" onclick="navigate('home')">Discover Creators</button></div>';}
+  if(!subs?.length){sl.innerHTML='<div class="empty"><div class="empty-icon">◈</div><h3>No active subscriptions</h3><button class="btn btn-gold btn-sm" style="margin-top:1rem" onclick="navigate(\'home\')">Discover Creators</button></div>';}
   else {
     sl.innerHTML=subs.map(s=>{
       const c=s.creator, name=c?.display_name||c?.username||'Creator';
-      return '<div class="admin-row"><div class="admin-avatar">'+(c?.avatar_url?'<img src="'+esc(c.avatar_url)+'">':getInitials(name))+'</div><div class="admin-info"><div class="admin-name">'+esc(name)+'</div><div class="admin-meta">$'+parseFloat(s.price_paid).toFixed(2)+'/mo · Renews '+new Date(s.expires_at).toLocaleDateString()+'</div></div><div class="admin-actions"><button class="btn btn-outline btn-sm" onclick="navigate('profile',{username:''+esc(c?.username||s.creator_id)+''})">View</button><button class="btn btn-danger btn-sm" onclick="cancelSub(''+s.creator_id+'')">Cancel</button></div></div>';
+      return '<div class="admin-row"><div class="admin-avatar">'+(c?.avatar_url?'<img src="'+esc(c.avatar_url)+'">':getInitials(name))+'</div><div class="admin-info"><div class="admin-name">'+esc(name)+'</div><div class="admin-meta">$'+parseFloat(s.price_paid).toFixed(2)+'/mo · Renews '+new Date(s.expires_at).toLocaleDateString()+'</div></div><div class="admin-actions"><button class="btn btn-outline btn-sm" onclick="navigate(\'profile\',{username:\''+esc(c?.username||s.creator_id)+'\'})" >View</button><button class="btn btn-danger btn-sm" onclick="cancelSub(\''+s.creator_id+'\')">Cancel</button></div></div>';
     }).join('');
   }
   const {data:purchases}=await db.from('purchases').select('*,content:content_id(title,thumbnail_url),creator:creator_id(display_name,username)').eq('buyer_id',S.user.id).order('purchased_at',{ascending:false});
@@ -1179,7 +1140,7 @@ function selLevel(l) {
   S.contentLevel=l;S.selTags=[];
   [0,1,2,3].forEach(x=>document.getElementById('cl-'+x)?.classList.toggle('sel',x===l));
   const cont=document.getElementById('tag-suggestions');
-  if(cont) cont.innerHTML=(TAG_SETS[l]||[]).map(t=>'<span class="tag-chip" onclick="toggleTag(''+t+'',this)" data-tag="'+t+'">'+t+'</span>').join('');
+  if(cont) cont.innerHTML=(TAG_SETS[l]||[]).map(t=>'<span class="tag-chip" onclick="toggleTag(\''+t+'\',this)" data-tag="'+t+'">'+t+'</span>').join('');
 }
 function toggleTag(tag, el) {
   S.selTags=S.selTags||[];
@@ -1306,7 +1267,7 @@ async function goLive() {
     await db.from('profiles').update({is_onboarded:true,updated_at:new Date().toISOString()}).eq('id',S.user.id);
     const {data}=await db.from('profiles').select('*').eq('id',S.user.id).single();
     S.profile=data;updateNav();
-    showToast('Welcome to HandHeaven ✦ You're live!','success');
+    showToast('Welcome to HandHeaven ✦ You\'re live!','success');
     navigate('creator-dashboard');
   } catch(e){err.textContent=e.message||'Error going live.';err.style.display='block';btn.disabled=false;btn.textContent='Go Live Now ✦';}
 }
@@ -1314,7 +1275,7 @@ function obDragOver(e){e.preventDefault();e.currentTarget.classList.add('drag');
 function obDrop(e){e.preventDefault();e.currentTarget.classList.remove('drag');obFiles(e.dataTransfer.files);}
 function obFiles(files){
   S.obFiles=[...S.obFiles,...files].slice(0,20);
-  document.getElementById('ob-photos').innerHTML=S.obFiles.map((f,i)=>'<div class="ob-photo"><img src="'+URL.createObjectURL(f)+'"><button class="ob-photo-rm" onclick="rmObFile('+i+')">✕</button></div>').join('');
+  document.getElementById('ob-photos').innerHTML=S.obFiles.map((f,i)=>'<div class="ob-photo"><img src="'+URL.createObjectURL(f)+'"><button class="ob-photo-rm" onclick="rmObFile(\'+i+\')">✕</button></div>').join('');
   document.getElementById('ob-count').textContent=S.obFiles.length;
 }
 function rmObFile(i){S.obFiles.splice(i,1);obFiles([]);}
@@ -1361,18 +1322,18 @@ function renderAdmCreators(list) {
     const name=c.display_name||c.username||'Creator';
     const tb=c.founder_tier===1?'<span class="badge badge-tier1">⭐ T1</span>':c.founder_tier===2?'<span class="badge badge-tier2">✦ T2</span>':'<span class="badge badge-muted">T3</span>';
     const sb=!c.is_onboarded?'<span class="badge badge-muted">Onboarding</span>':c.is_active?'<span class="badge badge-success">Active</span>':'<span class="badge badge-danger">Suspended</span>';
-    return '<div class="admin-row"><div class="admin-avatar">'+(c.avatar_url?'<img src="'+esc(c.avatar_url)+'">':getInitials(name))+'</div><div class="admin-info"><div class="admin-name">'+esc(name)+' '+tb+'</div><div class="admin-meta">'+(c.username?'@'+c.username+' · ':'')+c.subscriber_count+' subs · '+c.content_count+' posts · '+timeAgo(c.created_at)+'</div></div><div class="admin-actions">'+sb+'<button class="btn btn-'+(c.is_active?'danger':'success')+' btn-sm" onclick="toggleCreator(''+c.id+'','+c.is_active+')">'+(c.is_active?'Suspend':'Activate')+'</button></div></div>';
+    return '<div class="admin-row"><div class="admin-avatar">'+(c.avatar_url?'<img src="'+esc(c.avatar_url)+'">':getInitials(name))+'</div><div class="admin-info"><div class="admin-name">'+esc(name)+' '+tb+'</div><div class="admin-meta">'+(c.username?'@'+c.username+' · ':'')+c.subscriber_count+' subs · '+c.content_count+' posts · '+timeAgo(c.created_at)+'</div></div><div class="admin-actions">'+sb+'<button class="btn btn-'+(c.is_active?'danger':'success')+' btn-sm" onclick="toggleCreator(\''+c.id+'\','+c.is_active+')">'+(c.is_active?'Suspend':'Activate')+'</button></div></div>';
   }).join('');
 }
 function renderAdmBuyers(list) {
   const el=document.getElementById('adm-tab-buyers');
   if(!list?.length){el.innerHTML='<div class="empty"><p>No buyers yet</p></div>';return;}
-  el.innerHTML=list.map(b=>'<div class="admin-row"><div class="admin-avatar" style="background:var(--border2);color:var(--muted)">'+getInitials(b.username||'B')+'</div><div class="admin-info"><div class="admin-name">'+esc(b.username||b.id.slice(0,8))+'</div><div class="admin-meta">Joined '+timeAgo(b.created_at)+'</div></div><div class="admin-actions"><button class="btn btn-danger btn-sm" onclick="banBuyer(''+b.id+'')">Ban</button></div></div>').join('');
+  el.innerHTML=list.map(b=>'<div class="admin-row"><div class="admin-avatar" style="background:var(--border2);color:var(--muted)">'+getInitials(b.username||'B')+'</div><div class="admin-info"><div class="admin-name">'+esc(b.username||b.id.slice(0,8))+'</div><div class="admin-meta">Joined '+timeAgo(b.created_at)+'</div></div><div class="admin-actions"><button class="btn btn-danger btn-sm" onclick="banBuyer(\''+b.id+'\')"">Ban</button></div></div>').join('');
 }
 function renderAdmReports(list) {
   const el=document.getElementById('adm-tab-reports');
   if(!list?.length){el.innerHTML='<div class="empty"><div class="empty-icon">✓</div><p>No open reports</p></div>';return;}
-  el.innerHTML=list.map(r=>'<div class="report-card"><div style="display:flex;justify-content:space-between;margin-bottom:0.5rem"><div style="font-size:0.83rem;color:var(--white)">@'+esc(r.reporter?.username||'?')+' → <span style="color:var(--danger)">@'+esc(r.reported?.username||'?')+'</span></div><span class="badge badge-danger">'+r.report_type+'</span></div><div style="font-size:0.8rem;color:var(--muted);background:var(--bg2);padding:0.6rem;border-radius:var(--radius-s);margin-bottom:0.6rem">'+esc(r.reason)+'</div><div style="display:flex;gap:0.5rem"><button class="btn btn-danger btn-sm" onclick="actReport(''+r.id+'','ban')">Ban reported</button><button class="btn btn-outline btn-sm" onclick="actReport(''+r.id+'','warn')">Warn</button><button class="btn btn-ghost btn-sm" onclick="actReport(''+r.id+'','dismiss')">Dismiss</button></div></div>').join('');
+  el.innerHTML=list.map(r=>'<div class="report-card"><div style="display:flex;justify-content:space-between;margin-bottom:0.5rem"><div style="font-size:0.83rem;color:var(--white)">@'+esc(r.reporter?.username||'?')+' → <span style="color:var(--danger)">@'+esc(r.reported?.username||'?')+'</span></div><span class="badge badge-danger">'+r.report_type+'</span></div><div style="font-size:0.8rem;color:var(--muted);background:var(--bg2);padding:0.6rem;border-radius:var(--radius-s);margin-bottom:0.6rem">'+esc(r.reason)+'</div><div style="display:flex;gap:0.5rem"><button class="btn btn-danger btn-sm" onclick="actReport(\''+r.id+'\',\'ban\')">Ban reported</button><button class="btn btn-outline btn-sm" onclick="actReport(\''+r.id+'\',\'warn\')">Warn</button><button class="btn btn-ghost btn-sm" onclick="actReport(\''+r.id+'\',\'dismiss\')">Dismiss</button></div></div>').join('');
 }
 function renderAdmPayouts(list) {
   const el=document.getElementById('adm-tab-payouts');
@@ -1392,7 +1353,7 @@ async function loadModQueue() {
   const lvls=['🌿 SFW','🌶 Suggestive','🔞 NSFW','🔥 Explicit'];
   el.innerHTML=data.map(c=>{
     const minor=c.ai_moderation_status==='rejected_minor';
-    return '<div class="mod-card"><div style="display:flex;gap:0.75rem">'+(c.thumbnail_url?'<img src="'+esc(c.thumbnail_url)+'" style="width:72px;height:72px;object-fit:cover;border-radius:var(--radius-s);filter:'+(minor?'blur(8px)':'none')+'">':'<div style="width:72px;height:72px;background:var(--bg2);border-radius:var(--radius-s);display:flex;align-items:center;justify-content:center;color:var(--muted)">◈</div>')+'<div style="flex:1"><div style="font-size:0.88rem;color:var(--white);margin-bottom:3px">'+esc(c.title)+'</div><div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.5rem">@'+(c.profiles?.username||'?')+' · '+timeAgo(c.created_at)+'</div><div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.5rem"><span class="badge badge-gold">'+lvls[c.content_level||0]+'</span>'+(c.ai_content_level!==null?'<span class="badge badge-danger">AI: '+lvls[c.ai_content_level]+'</span>':'')+'<span class="badge badge-'+(minor?'danger':'muted')+'">'+c.ai_moderation_status+'</span>'+(c.ai_flags||[]).map(f=>'<span class="badge badge-danger">'+f+'</span>').join('')+'</div><div style="display:flex;gap:0.5rem">'+(minor?'':'<button class="btn btn-success btn-sm" onclick="admApprove(''+c.id+'')">✓ Approve</button>')+'<button class="btn btn-danger btn-sm" onclick="admReject(''+c.id+'')">✕ Remove</button></div></div></div></div>';
+    return '<div class="mod-card"><div style="display:flex;gap:0.75rem">'+(c.thumbnail_url?'<img src="'+esc(c.thumbnail_url)+'" style="width:72px;height:72px;object-fit:cover;border-radius:var(--radius-s);filter:'+(minor?'blur(8px)':'none')+'">':'<div style="width:72px;height:72px;background:var(--bg2);border-radius:var(--radius-s);display:flex;align-items:center;justify-content:center;color:var(--muted)">◈</div>')+'<div style="flex:1"><div style="font-size:0.88rem;color:var(--white);margin-bottom:3px">'+esc(c.title)+'</div><div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.5rem">@'+(c.profiles?.username||'?')+' · '+timeAgo(c.created_at)+'</div><div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.5rem"><span class="badge badge-gold">'+lvls[c.content_level||0]+'</span>'+(c.ai_content_level!==null?'<span class="badge badge-danger">AI: '+lvls[c.ai_content_level]+'</span>':'')+'<span class="badge badge-'+(minor?'danger':'muted')+'">'+c.ai_moderation_status+'</span>'+(c.ai_flags||[]).map(f=>'<span class="badge badge-danger">'+f+'</span>').join('')+'</div><div style="display:flex;gap:0.5rem">'+(minor?'':'<button class="btn btn-success btn-sm" onclick="admApprove(\''+c.id+'\')"">✓ Approve</button>')+'<button class="btn btn-danger btn-sm" onclick="admReject(\''+c.id+'\')"">✕ Remove</button></div></div></div></div>';
   }).join('');
 }
 async function toggleCreator(id, isActive){await db.from('profiles').update({is_active:!isActive}).eq('id',id);showToast(isActive?'Creator suspended':'Creator reactivated','success');loadAdminData();}
@@ -1434,10 +1395,28 @@ function showToast(msg, type='success'){
   document.body.appendChild(t);setTimeout(()=>t.remove(),4000);
 }
 
-// Run age gate immediately when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-  initAgeGate();
-});
+// Run age gate check immediately
+(function() {
+  if (sessionStorage.getItem('hh-age')) {
+    document.addEventListener('DOMContentLoaded', function() {
+      const ag = document.getElementById('age-gate');
+      if (ag) ag.style.display = 'none';
+    });
+  }
+})();
+
+function verifyAge() {
+  const terms = document.getElementById('ag-terms').checked;
+  const err = document.getElementById('ag-error');
+  err.style.display = 'none';
+  if (!terms) {
+    err.textContent = 'Please confirm you are 18+ and agree to the Terms.';
+    err.style.display = 'block';
+    return;
+  }
+  sessionStorage.setItem('hh-age', '1');
+  document.getElementById('age-gate').style.display = 'none';
+}
 
 // ============================================
 // INIT
