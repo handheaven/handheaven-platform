@@ -464,6 +464,17 @@ footer a:hover{color:var(--gold)}
   </div>
   <div id="dt-settings" class="dash-section">
     <div style="max-width:500px">
+      <div class="form-group">
+        <label class="form-label">Profile photo</label>
+        <div style="display:flex;align-items:center;gap:1rem">
+          <div id="set-av-preview" style="width:72px;height:72px;border-radius:50%;background:var(--gold-d);border:2px solid var(--gold-b);display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:var(--gold);overflow:hidden;flex-shrink:0;cursor:pointer" onclick="document.getElementById('set-av-file').click()">✦</div>
+          <div>
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('set-av-file').click()">Change photo</button>
+            <p class="form-hint" style="margin-top:0.35rem">JPG or PNG recommended</p>
+          </div>
+        </div>
+        <input type="file" id="set-av-file" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+      </div>
       <div class="form-group"><label class="form-label">Display name</label><input class="form-input" type="text" id="set-name" placeholder="Your display name"></div>
       <div class="form-group"><label class="form-label">Bio</label><textarea class="form-input" id="set-bio" rows="3" style="resize:vertical"></textarea></div>
       <div class="form-group"><label class="form-label">Subscription price ($/month)</label><div class="input-prefix"><span>$</span><input class="form-input" type="number" id="set-price" min="3" max="50" step="0.01"></div><p class="form-hint">You keep 85% after processing fees · Recommended: $7.99-$14.99</p></div>
@@ -501,6 +512,17 @@ footer a:hover{color:var(--gold)}
     <div class="ob-step" id="os-2">
       <div class="ob-title">Set up your profile</div>
       <div class="ob-sub">This is what buyers will see.</div>
+      <div class="form-group">
+        <label class="form-label">Profile photo (recommended)</label>
+        <div style="display:flex;align-items:center;gap:1rem">
+          <div id="ob-av-preview" style="width:72px;height:72px;border-radius:50%;background:var(--gold-d);border:2px solid var(--gold-b);display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:var(--gold);overflow:hidden;flex-shrink:0;cursor:pointer" onclick="document.getElementById('ob-av-file').click()">✦</div>
+          <div>
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('ob-av-file').click()">Upload photo</button>
+            <p class="form-hint" style="margin-top:0.35rem">JPG or PNG · shown on your public profile</p>
+          </div>
+        </div>
+        <input type="file" id="ob-av-file" accept="image/*" style="display:none" onchange="previewAvatar(this)">
+      </div>
       <div class="form-group"><label class="form-label">Display name *</label><input class="form-input" type="text" id="ob-name" placeholder="How buyers will know you"></div>
       <div class="form-group"><label class="form-label">Username *</label><input class="form-input" type="text" id="ob-username" placeholder="yourname" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')"><p class="form-hint">handheaven.com/@yourname</p></div>
       <div class="form-group"><label class="form-label">Bio</label><textarea class="form-input" id="ob-bio" rows="3" style="resize:vertical" placeholder="Tell buyers what makes your content unique..."></textarea></div>
@@ -533,7 +555,13 @@ footer a:hover{color:var(--gold)}
     <!-- Step 5 -->
     <div class="ob-step" id="os-5">
       <div class="ob-title">Upload your content</div>
-      <div class="ob-sub">Upload at least <strong style="color:var(--white)">5 photos</strong>. First 2 will be set as free previews automatically.</div>
+      <div class="ob-sub">Upload at least <strong style="color:var(--white)">5 photos</strong> to activate your profile.</div>
+      <div class="info-box" style="margin-bottom:1rem">
+        💡 <strong>How pricing works for these uploads:</strong><br>
+        ✦ First 2 photos → <span style="color:var(--success)">Free previews</span> (attract buyers)<br>
+        ✦ Remaining photos → <span style="color:var(--gold)">Subscribers only</span> (recurring income)<br><br>
+        After going live you can upload more content with <strong style="color:var(--white)">custom pricing, PPV, and tags</strong> from your dashboard.
+      </div>
       <div class="upload-zone" id="ob-zone" onclick="document.getElementById('ob-file').click()" ondragover="obDragOver(event)" ondrop="obDrop(event)">
         <div style="font-size:2rem;color:var(--muted);margin-bottom:0.5rem">◈</div>
         <div style="font-size:0.85rem;color:var(--muted)">Click to upload or drag photos here<br><span style="font-size:0.72rem">JPG, PNG, GIF, MP4 · Max 50MB each</span></div>
@@ -687,6 +715,48 @@ footer a:hover{color:var(--gold)}
   </div>
 </div>
 
+<!-- CONTENT VIEWER MODAL -->
+<div class="modal-overlay" id="modal-viewer">
+  <div class="modal modal-md">
+    <div class="modal-hdr"><div class="modal-title" id="viewer-title">Content</div><button class="modal-close" onclick="closeModal('modal-viewer')">✕</button></div>
+    <div class="modal-body" style="padding:0" id="viewer-body"></div>
+  </div>
+</div>
+
+<!-- MODIFY CONTENT MODAL -->
+<div class="modal-overlay" id="modal-modify">
+  <div class="modal modal-md">
+    <div class="modal-hdr"><div class="modal-title">Edit Content</div><button class="modal-close" onclick="closeModal('modal-modify')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="mod-id">
+      <div class="form-group"><label class="form-label">Title</label><input class="form-input" type="text" id="mod-title" placeholder="Content title"></div>
+      <div class="form-group"><label class="form-label">Pricing</label>
+        <div class="price-opts">
+          <div class="price-opt" id="mod-free" onclick="selModPricing('free')"><div style="font-size:1rem;margin-bottom:4px">🔓</div><div style="font-size:0.8rem;font-weight:500;color:var(--success)">Free Preview</div></div>
+          <div class="price-opt" id="mod-sub" onclick="selModPricing('sub')"><div style="font-size:1rem;margin-bottom:4px">🔒</div><div style="font-size:0.8rem;font-weight:500;color:var(--gold)">Subscribers Only</div></div>
+          <div class="price-opt" id="mod-ppv" onclick="selModPricing('ppv')"><div style="font-size:1rem;margin-bottom:4px">💰</div><div style="font-size:0.8rem;font-weight:500">Pay Per View</div></div>
+        </div>
+        <div id="mod-ppv-wrap" style="display:none;margin-top:0.75rem"><div class="input-prefix"><span>$</span><input class="form-input" type="number" id="mod-price" placeholder="4.99" min="1" step="0.01"></div></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Content Level</label>
+        <div class="level-opts">
+          <div class="level-opt" id="mod-cl-0" onclick="selModLevel(0)"><div style="font-size:0.85rem;font-weight:500;color:var(--success)">🌿 SFW</div></div>
+          <div class="level-opt" id="mod-cl-1" onclick="selModLevel(1)"><div style="font-size:0.85rem;font-weight:500;color:var(--gold)">🌶 Suggestive</div></div>
+          <div class="level-opt" id="mod-cl-2" onclick="selModLevel(2)"><div style="font-size:0.85rem;font-weight:500;color:var(--warning)">🔞 NSFW</div></div>
+          <div class="level-opt" id="mod-cl-3" onclick="selModLevel(3)"><div style="font-size:0.85rem;font-weight:500;color:var(--danger)">🔥 Explicit</div></div>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Tags <span style="color:var(--muted);font-weight:300">(comma separated)</span></label><input class="form-input" type="text" id="mod-tags" placeholder="nail-art, jewelry, aesthetic..."></div>
+      <div class="form-error" id="mod-err"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-modify')">Cancel</button>
+      <button class="btn btn-gold" onclick="saveModify()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
 <!-- SUBSCRIBE MODAL -->
 <div class="modal-overlay" id="modal-sub">
   <div class="modal modal-sm">
@@ -741,7 +811,12 @@ function goDash(){
   else if(S.profile.role==='creator') navigate(S.profile.is_onboarded?'creator-dashboard':'onboarding');
   else navigate('buyer-dashboard');
 }
-function goProfile(){closeNav();if(S.profile?.username)navigate('profile',{username:S.profile.username});}
+function goProfile(){
+  closeNav();
+  const u=S.profile?.username||S.profile?.id;
+  if(u) navigate('profile',{username:u});
+  else showToast('Complete your profile setup first','error');
+}
 
 // ============================================
 // NAVIGATION
@@ -753,6 +828,12 @@ function navigate(page, params={}) {
   el.classList.add('active');
   S.page=page;
   window.scrollTo(0,0);
+  // Update browser URL
+  if(page==='profile'&&params.username) {
+    history.pushState({},'','/@'+params.username);
+  } else if(page==='home') {
+    history.pushState({},'','/');
+  }
   if(page==='home'){loadCreators();updateFounderBar();}
   if(page==='profile'&&params.username) loadCreatorProfile(params.username);
   if(page==='creator-dashboard') loadCreatorDash();
@@ -818,15 +899,24 @@ async function doLogin() {
   showToast('Welcome back ✦','success');
 }
 async function doLogout() {
-  await db.auth.signOut();S.user=null;S.profile=null;updateNav();navigate('home');showToast('Signed out','success');
+  try {
+    await db.auth.signOut();
+  } catch(e) {}
+  S.user=null;S.profile=null;
+  updateNav();
+  closeNav();
+  navigate('home');
+  showToast('Signed out successfully','success');
 }
 async function loadProfile() {
   if(!S.user) return;
-  const {data}=await db.from('profiles').select('*').eq('id',S.user.id).single();
-  S.profile=data;
-  if(!data) return;
-  updateNav();
-  if(data.role==='creator'&&!data.is_onboarded&&S.page==='home') setTimeout(()=>navigate('onboarding'),500);
+  try {
+    const {data}=await db.from('profiles').select('*').eq('id',S.user.id).single();
+    S.profile=data;
+    if(!data) return;
+    updateNav();
+    if(data.role==='creator'&&!data.is_onboarded&&S.page==='home') setTimeout(()=>navigate('onboarding'),500);
+  } catch(e) { S.profile=null; }
 }
 function updateNav() {
   const p=S.profile;
@@ -871,17 +961,9 @@ function renderCreators(list) {
   if(!list?.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">◈</div><h3>No creators yet</h3><p>Be the first founding creator — $0 forever</p><button class="btn btn-gold" style="margin-top:1rem" onclick="openAuth(\'signup\',\'creator\')">Join as Creator ✦</button></div>';return;}
   grid.innerHTML=list.map(c=>{
     const name=c.display_name||c.username||'Creator';
-    const tb=c.founder_tier===1?'<span class="badge badge-tier1" style="margin-bottom:0.35rem;display:inline-flex">⭐ Founding</span>':c.founder_tier===2?'<span class="badge badge-tier2" style="margin-bottom:0.35rem;display:inline-flex">✦ Early Adopter</span>':'';
-    return '<div class="creator-card" onclick="navigate(\'profile\',{username:\''+esc(c.username||c.id)+'\'})">'
-      +'<div class="creator-cover">'+(c.cover_url?'<img src="'+esc(c.cover_url)+'" alt="">':'<div class="creator-cover-bg">✦</div>')
-      +'<div class="creator-avatar">'+(c.avatar_url?'<img src="'+esc(c.avatar_url)+'">':getInitials(name))+'</div></div>'
-      +'<div class="creator-card-body">'
-      +'<div class="creator-name">'+esc(name)+(c.is_verified?'<span class="verified-badge">✦</span>':'')+'</div>'
-      +(tb?'<div>'+tb+'</div>':'')
-      +(c.bio?'<div class="creator-bio">'+esc(c.bio)+'</div>':'')
-      +(c.tags?.length?'<div class="creator-tags">'+c.tags.slice(0,3).map(t=>'<span class="creator-tag">'+esc(t)+'</span>').join('')+'</div>':'')
-      +'<div class="creator-footer"><div class="creator-price">$'+parseFloat(c.subscription_price||9.99).toFixed(2)+'<span>/mo</span></div><div style="font-size:0.72rem;color:var(--muted)">'+(c.subscriber_count||0)+' subs</div></div>'
-      +'</div></div>';
+    const photo=c.avatar_url||c.cover_url||null;
+    const tb=c.founder_tier===1?'<span class="badge badge-tier1">⭐ Founding</span>':c.founder_tier===2?'<span class="badge badge-tier2">✦ Early Adopter</span>':'';
+    return '<div class="creator-card" onclick="navigate(\'profile\',{username:\''+esc(c.username||c.id)+'\'})">'      +'<div style="height:180px;position:relative;overflow:hidden;background:var(--bg2)">'      +(photo?'<img src="'+esc(photo)+'" style="width:100%;height:100%;object-fit:cover;display:block">':'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem;color:var(--gold-b)">✦</div>')      +'<div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 35%,rgba(10,9,8,0.92) 100%)"></div>'      +'<div style="position:absolute;bottom:0;left:0;right:0;padding:0.85rem 1rem">'      +'<div style="font-size:0.95rem;font-weight:500;color:#fff">'+esc(name)+(c.is_verified?' <span style=\"color:var(--gold)\">✦</span>':'')+'</div>'      +(tb?'<div style=\"margin-top:3px\">'+tb+'</div>':'')      +'</div></div>'      +'<div style="padding:0.75rem 1rem 1rem">'      +(c.bio?'<div class="creator-bio">'+esc(c.bio)+'</div>':'')      +(c.tags?.length?'<div class="creator-tags" style=\"margin-bottom:0.5rem\">'+c.tags.slice(0,3).map(t=>'<span class="creator-tag">'+esc(t)+'</span>').join('')+'</div>':'')      +'<div class="creator-footer"><div class="creator-price">$'+parseFloat(c.subscription_price||9.99).toFixed(2)+'<span>/mo</span></div>'      +'<div style="font-size:0.72rem;color:var(--muted)">'+(c.subscriber_count||0)+' subs</div></div>'      +'</div></div>';
   }).join('');
 }
 function debSearch(v){clearTimeout(S.searchTimer);S.searchTimer=setTimeout(()=>loadCreators(v),350);}
@@ -902,7 +984,11 @@ async function loadCreatorProfile(u) {
   cont.innerHTML='<div class="loader" style="padding-top:80px"></div>';
   let q=db.from('profiles').select('*');
   q=(u.includes('-')&&u.length===36)?q.eq('id',u):q.eq('username',u);
-  const {data:c}=await q.single();
+  let c;
+  try {
+    const {data}=await q.single();
+    c=data;
+  } catch(e) { c=null; }
   if(!c){cont.innerHTML='<div class="empty" style="padding-top:80px"><div class="empty-icon">◈</div><h3>Creator not found</h3></div>';return;}
   S.viewCreator=c;
   const {data:content}=await db.from('content').select('*').eq('creator_id',c.id).eq('is_published',true).order('created_at',{ascending:false});
@@ -1044,6 +1130,9 @@ async function loadCreatorDash() {
   document.getElementById('set-bio').value=p.bio||'';
   document.getElementById('set-price').value=p.subscription_price||9.99;
   document.getElementById('set-payout').value=p.payout_method||'paxum';
+  // Show current avatar in settings
+  const setAv = document.getElementById('set-av-preview');
+  if(setAv) setAv.innerHTML = p.avatar_url ? '<img src="'+esc(p.avatar_url)+'" style="width:100%;height:100%;object-fit:cover">' : '✦';
   const {data:earnings}=await db.from('earnings').select('net_amount,type').eq('creator_id',S.user.id);
   const subE=(earnings||[]).filter(e=>e.type==='subscription').reduce((s,e)=>s+parseFloat(e.net_amount||0),0);
   const ppvE=(earnings||[]).filter(e=>e.type==='purchase').reduce((s,e)=>s+parseFloat(e.net_amount||0),0);
@@ -1066,7 +1155,8 @@ function renderDashContent() {
   list.innerHTML=S.myContent.map(c=>{
     const tc=c.is_free?'var(--success)':c.price?'var(--gold)':'var(--muted)';
     const tl=c.is_free?'🔓 Free':c.price?'💰 $'+parseFloat(c.price).toFixed(2)+' PPV':'🔒 Subscribers';
-    return '<div class="content-row"><div class="row-thumb">'+(c.thumbnail_url?'<img src="'+esc(c.thumbnail_url)+'">':'◈')+'</div><div class="row-info"><div class="row-title">'+esc(c.title)+'</div><div class="row-meta"><span style="color:'+tc+';font-weight:500">'+tl+'</span><span>'+(c.view_count||0)+' views · '+timeAgo(c.created_at)+'</span></div></div><div class="row-actions"><button class="btn btn-danger btn-sm" onclick="delContent(\''+c.id+'\')"">Delete</button></div></div>';
+    const cid=c.id;
+    return '<div class="content-row"><div class="row-thumb">'+(c.thumbnail_url?'<img src="'+esc(c.thumbnail_url)+'">':' ◈')+'</div><div class="row-info"><div class="row-title">'+esc(c.title)+'</div><div class="row-meta"><span style="color:'+tc+';font-weight:500">'+tl+'</span><span>'+(c.view_count||0)+' views &middot; '+timeAgo(c.created_at)+'</span></div></div><div class="row-actions"><button class="btn btn-outline btn-sm" onclick="openModify(\''+cid+'\')">Edit</button><button class="btn btn-danger btn-sm" onclick="delContent(\''+cid+'\')">Delete</button></div></div>';
   }).join('');
 }
 function switchDashTab(tab, btn) {
@@ -1092,13 +1182,31 @@ async function reqPayout() {
   showToast('Payout request submitted. You will receive payment this Friday via Paxum ✦','success');
 }
 async function copyLink() {
-  await navigator.clipboard.writeText('https://handheaven.com/@'+S.profile?.username);
+  const link='https://handheaven.com/@'+S.profile?.username;
+  await navigator.clipboard.writeText(link);
   showToast('Profile link copied ✦','success');
 }
 async function delContent(id) {
   if(!confirm('Delete this content permanently?')) return;
-  await db.from('content').delete().eq('id',id);
-  showToast('Content deleted','success');loadCreatorDash();
+  try {
+    // Get file paths before deleting
+    const {data:c}=await db.from('content').select('file_urls,thumbnail_url').eq('id',id).single();
+    // Delete from database
+    const {error}=await db.from('content').delete().eq('id',id);
+    if(error) throw new Error(error.message);
+    // Try to clean up storage (silent fail ok)
+    try {
+      if(c?.file_urls?.length) await db.storage.from('content').remove(c.file_urls);
+      if(c?.thumbnail_url) {
+        const tp=c.thumbnail_url.split('/thumbnails/')[1];
+        if(tp) await db.storage.from('thumbnails').remove([tp]);
+      }
+    } catch(e){}
+    showToast('Content deleted','success');
+    loadCreatorDash();
+  } catch(e){
+    showToast('Delete failed: '+e.message,'error');
+  }
 }
 
 // ============================================
@@ -1225,6 +1333,37 @@ function showObs(step) {
   document.getElementById('os-'+step)?.classList.add('active');
   document.querySelectorAll('.ob-dot').forEach((d,i)=>{d.classList.remove('active','done');if(i+1<step)d.classList.add('done');else if(i+1===step)d.classList.add('active');});
 }
+// ============================================
+// AVATAR UPLOAD
+// ============================================
+function previewAvatar(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const previewId = input.id === 'ob-av-file' ? 'ob-av-preview' : 'set-av-preview';
+  const el = document.getElementById(previewId);
+  el.innerHTML = '<img src="'+URL.createObjectURL(file)+'" style="width:100%;height:100%;object-fit:cover">';
+  // Auto-upload if in settings (not onboarding)
+  if (input.id === 'set-av-file') uploadAvatar(input);
+}
+
+async function uploadAvatar(input) {
+  const file = input.files[0];
+  if (!file || !S.user) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  const path = S.user.id+'/avatar.'+ext;
+  try {
+    await db.storage.from('avatars').upload(path, file, { upsert: true });
+    const { data } = db.storage.from('avatars').getPublicUrl(path);
+    const avatarUrl = data?.publicUrl;
+    if (avatarUrl) {
+      await db.from('profiles').update({ avatar_url: avatarUrl }).eq('id', S.user.id);
+      S.profile = { ...S.profile, avatar_url: avatarUrl };
+      updateNav();
+      showToast('Profile photo updated ✦', 'success');
+    }
+  } catch(e) { showToast('Photo upload failed: '+e.message, 'error'); }
+}
+
 async function obsStep2() {
   const name=document.getElementById('ob-name').value.trim();
   const username=document.getElementById('ob-username').value.trim().toLowerCase();
@@ -1233,14 +1372,106 @@ async function obsStep2() {
   if(!name){err.textContent='Display name is required.';err.style.display='block';return;}
   if(!username||username.length<3){err.textContent='Username must be at least 3 characters.';err.style.display='block';return;}
   if(!/^[a-z0-9_]+$/.test(username)){err.textContent='Username: letters, numbers and underscores only.';err.style.display='block';return;}
-  // Check username availability — mayfail if no row found, that's OK
   try {
     const {data:ex}=await db.from('profiles').select('id').eq('username',username).neq('id',S.user.id).single();
     if(ex){err.textContent='This username is taken. Please choose another.';err.style.display='block';return;}
-  } catch(e){ /* No existing user found — username is available */ }
-  await db.from('profiles').update({display_name:name,username,bio,updated_at:new Date().toISOString()}).eq('id',S.user.id);
-  S.profile={...S.profile,display_name:name,username,bio};
+  } catch(e){}
+  // Upload avatar if selected
+  const avFile = document.getElementById('ob-av-file')?.files[0];
+  let avatarUrl = S.profile?.avatar_url || null;
+  if (avFile) {
+    try {
+      const ext = avFile.name.split('.').pop().toLowerCase();
+      const path = S.user.id+'/avatar.'+ext;
+      await db.storage.from('avatars').upload(path, avFile, { upsert: true });
+      const { data } = db.storage.from('avatars').getPublicUrl(path);
+      avatarUrl = data?.publicUrl || null;
+    } catch(e) {}
+  }
+  await db.from('profiles').update({
+    display_name:name, username, bio,
+    avatar_url: avatarUrl,
+    updated_at:new Date().toISOString()
+  }).eq('id',S.user.id);
+  S.profile={...S.profile,display_name:name,username,bio,avatar_url:avatarUrl};
   showObs(3);
+}
+
+// ============================================
+// CONTENT VIEWER
+// ============================================
+function viewContent(id) {
+  const c = S.viewContent.find(x=>x.id===id);
+  if (!c) return;
+  document.getElementById('viewer-title').textContent = c.title;
+  const isVideo = c.content_type === 'video';
+  const src = c.thumbnail_url;
+  document.getElementById('viewer-body').innerHTML = src
+    ? (isVideo
+        ? '<video src="'+esc(src)+'" controls style="width:100%;max-height:80vh;display:block"></video>'
+        : '<img src="'+esc(src)+'" style="width:100%;height:auto;display:block;max-height:80vh;object-fit:contain">')
+    : '<div style="padding:3rem;text-align:center;color:var(--muted)">Preview not available</div>';
+  openModal('modal-viewer');
+}
+
+// ============================================
+// MODIFY CONTENT
+// ============================================
+let S_modPricing = 'free';
+let S_modLevel = 0;
+
+function openModify(id) {
+  const c = S.myContent.find(x=>x.id===id);
+  if (!c) return;
+  document.getElementById('mod-id').value = id;
+  document.getElementById('mod-title').value = c.title || '';
+  document.getElementById('mod-tags').value = (c.tags||[]).join(', ');
+  document.getElementById('mod-err').style.display = 'none';
+  // Set pricing
+  const mode = c.is_free ? 'free' : c.price ? 'ppv' : 'sub';
+  selModPricing(mode);
+  if (c.price) document.getElementById('mod-price').value = c.price;
+  // Set level
+  selModLevel(c.content_level || 0);
+  openModal('modal-modify');
+}
+
+function selModPricing(mode) {
+  S_modPricing = mode;
+  ['free','sub','ppv'].forEach(m => {
+    document.getElementById('mod-'+m)?.classList.toggle('sel', m===mode);
+  });
+  document.getElementById('mod-ppv-wrap').style.display = mode==='ppv' ? 'block' : 'none';
+}
+
+function selModLevel(level) {
+  S_modLevel = level;
+  [0,1,2,3].forEach(l => {
+    document.getElementById('mod-cl-'+l)?.classList.toggle('sel', l===level);
+  });
+}
+
+async function saveModify() {
+  const id = document.getElementById('mod-id').value;
+  const title = document.getElementById('mod-title').value.trim();
+  const tags = document.getElementById('mod-tags').value.split(',').map(t=>t.trim().toLowerCase()).filter(Boolean);
+  const price = S_modPricing==='ppv' ? parseFloat(document.getElementById('mod-price').value) : null;
+  const isFree = S_modPricing==='free';
+  const err = document.getElementById('mod-err');
+  err.style.display='none';
+  if (!title) { err.textContent='Title is required.'; err.style.display='block'; return; }
+  if (S_modPricing==='ppv' && (!price||price<1)) { err.textContent='Enter a valid PPV price (min $1).'; err.style.display='block'; return; }
+  try {
+    await db.from('content').update({
+      title, tags, is_free:isFree, price,
+      is_nsfw: S_modLevel>=2,
+      content_level: S_modLevel,
+      updated_at: new Date().toISOString()
+    }).eq('id',id);
+    closeModal('modal-modify');
+    showToast('Content updated ✦','success');
+    loadCreatorDash();
+  } catch(e) { err.textContent='Update failed: '+e.message; err.style.display='block'; }
 }
 async function obsStep3() {
   const legal=document.getElementById('ob-legal').value.trim();
@@ -1250,9 +1481,23 @@ async function obsStep3() {
   if(!legal){err.textContent='Legal name is required.';err.style.display='block';return;}
   if(!dob){err.textContent='Date of birth is required.';err.style.display='block';return;}
   if((new Date()-new Date(dob))/(365.25*24*60*60*1000)<18){err.textContent='You must be 18+ to create content on HandHeaven.';err.style.display='block';return;}
-  await db.from('compliance_records').upsert({creator_id:S.user.id,legal_name:legal,birth_date:dob,document_type:doc},{onConflict:'creator_id'});
-  await db.from('profiles').update({age_verified:true,age_verified_at:new Date().toISOString()}).eq('id',S.user.id);
-  showObs(4);
+  try {
+    // Try insert first, if exists update
+    const {error:insertErr}=await db.from('compliance_records').insert({
+      creator_id:S.user.id,legal_name:legal,birth_date:dob,document_type:doc
+    });
+    if(insertErr) {
+      // Record exists — update it
+      await db.from('compliance_records').update({
+        legal_name:legal,birth_date:dob,document_type:doc
+      }).eq('creator_id',S.user.id);
+    }
+    await db.from('profiles').update({age_verified:true,age_verified_at:new Date().toISOString()}).eq('id',S.user.id);
+    showObs(4);
+  } catch(e) {
+    err.textContent='Error saving legal information. Please try again.';
+    err.style.display='block';
+  }
 }
 async function obsStep4() {
   const price=parseFloat(document.getElementById('ob-price').value);
@@ -1469,17 +1714,28 @@ function verifyAge() {
 async function init(){
   const {data:{session}}=await db.auth.getSession();
   if(session?.user){S.user=session.user;await loadProfile();}
-  updateNav();loadCreators();updateFounderBar();
+  updateNav();
+
+  // Handle direct URL routing
+  const path=window.location.pathname;
   const hash=window.location.hash;
-  if(hash==='#join') setTimeout(()=>openAuth('signup','creator'),500);
-  if(hash==='#admin') {
-    // Wait for profile to load before navigating to admin
+
+  if(path.startsWith('/@')) {
+    // Direct creator profile URL: handheaven.com/@username
+    const username=path.slice(2);
+    if(username) { navigate('profile',{username}); return; }
+  } else if(hash==='#join') {
+    setTimeout(()=>openAuth('signup','creator'),500);
+  } else if(hash==='#admin') {
     setTimeout(()=>{
       if(S.profile?.role==='admin') navigate('admin');
       else if(!S.user) openAuth('login');
       else showToast('Admin access requires admin account.','error');
     },1500);
   }
+
+  loadCreators();
+  updateFounderBar();
 }
 init();
 </script>
