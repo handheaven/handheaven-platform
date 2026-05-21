@@ -441,11 +441,9 @@ footer a:hover{color:var(--gold)}
       <div class="stat-card"><div class="stat-label">Content</div><div class="stat-value" id="cd-content-count">0</div><div class="stat-sub" id="cd-content-break">0 free · 0 locked · 0 PPV</div></div>
     </div>
     <div class="card" style="margin-bottom:1rem">
-      <div style="font-size:0.78rem;color:var(--gold);margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:0.08em">Your profile link</div>
-      <div style="font-size:0.85rem;color:var(--gold);margin-bottom:0.75rem" id="cd-link"></div>
+      <div style="font-size:0.78rem;color:var(--gold);margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:0.08em">Your profile</div>
       <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
-        <button class="btn btn-outline btn-sm" onclick="copyLink()">Copy link</button>
-        <button class="btn btn-outline btn-sm" onclick="goProfile()">View profile</button>
+        <button class="btn btn-outline btn-sm" onclick="goProfile()">View public profile</button>
       </div>
     </div>
     <div id="cd-free-warn" style="display:none" class="info-box">💡 <strong>Add free preview content</strong> — Creators with 2-3 free previews get 3x more subscribers. <button class="btn btn-gold btn-sm" style="margin-left:0.5rem" onclick="openUpload()">Upload now</button></div>
@@ -1125,7 +1123,6 @@ async function loadCreatorDash() {
   document.getElementById('cd-pending').textContent='$'+parseFloat(p.pending_payout||0).toFixed(2);
   document.getElementById('cd-subs').textContent=p.subscriber_count||0;
   document.getElementById('cd-payout-bal').textContent='$'+parseFloat(p.pending_payout||0).toFixed(2);
-  if(p.username) document.getElementById('cd-link').textContent='handheaven.com/@'+p.username;
   document.getElementById('set-name').value=p.display_name||'';
   document.getElementById('set-bio').value=p.bio||'';
   document.getElementById('set-price').value=p.subscription_price||9.99;
