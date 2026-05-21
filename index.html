@@ -852,14 +852,19 @@ db.auth.onAuthStateChange(async(event,session)=>{
 // ============================================
 async function loadCreators(search='') {
   const grid=document.getElementById('creator-grid');
+  if(!grid) return;
   grid.innerHTML='<div class="loader"></div>';
-  let q=db.from('profiles').select('*').eq('role','creator').eq('is_active',true).eq('is_onboarded',true).order('subscriber_count',{ascending:false});
-  if(search) q=q.ilike('display_name','%'+search+'%');
-  const {data}=await q;
-  S.creators=data||[];
-  const c=document.getElementById('creator-count');
-  if(c) c.textContent=S.creators.length+' creator'+(S.creators.length!==1?'s':'');
-  renderCreators(S.creators);
+  try {
+    let q=db.from('profiles').select('*').eq('role','creator').eq('is_active',true).eq('is_onboarded',true).order('subscriber_count',{ascending:false});
+    if(search) q=q.ilike('display_name','%'+search+'%');
+    const {data}=await q;
+    S.creators=data||[];
+    const c=document.getElementById('creator-count');
+    if(c) c.textContent=S.creators.length+' creator'+(S.creators.length!==1?'s':'');
+    renderCreators(S.creators);
+  } catch(e) {
+    grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">◈</div><p>Could not load creators. Please refresh.</p></div>';
+  }
 }
 function renderCreators(list) {
   const grid=document.getElementById('creator-grid');
@@ -904,7 +909,12 @@ async function loadCreatorProfile(u) {
   S.viewContent=content||[];
   S.isMine=S.user?.id===c.id;
   S.isSubscribed=false;
-  if(S.user&&!S.isMine){const {data:sub}=await db.from('subscriptions').select('id').eq('buyer_id',S.user.id).eq('creator_id',c.id).eq('status','active').single();S.isSubscribed=!!sub;}
+  if(S.user&&!S.isMine){
+    try {
+      const {data:sub}=await db.from('subscriptions').select('id').eq('buyer_id',S.user.id).eq('creator_id',c.id).eq('status','active').single();
+      S.isSubscribed=!!sub;
+    } catch(e){ S.isSubscribed=false; }
+  }
   const free=S.viewContent.filter(x=>x.is_free), locked=S.viewContent.filter(x=>!x.is_free&&!x.price), ppv=S.viewContent.filter(x=>!x.is_free&&x.price>0);
   const totalLocked=locked.length+ppv.length, price=parseFloat(c.subscription_price||9.99).toFixed(2);
   const name=c.display_name||c.username||'Creator';
@@ -1173,10 +1183,15 @@ async function doUpload() {
   if(S.pricingMode==='ppv'&&(!price||price<1)){err.textContent='Please enter a valid PPV price (min $1).';err.style.display='block';return;}
   const btn=document.getElementById('up-btn');btn.disabled=true;btn.textContent='Uploading...';
   try {
-    const f=S.upFiles[0], ext=f.name.split('.').pop(), path=S.user.id+'/'+Date.now()+'.'+ext;
-    await db.storage.from('content').upload(path,f);
+    const f=S.upFiles[0], ext=f.name.split('.').pop().toLowerCase(), path=S.user.id+'/'+Date.now()+'.'+ext;
+    const {error:upErr}=await db.storage.from('content').upload(path,f);
+    if(upErr) throw new Error('Storage error: '+upErr.message);
     let thumbUrl=null;
-    if(f.type.startsWith('image/')){const tp=S.user.id+'/'+Date.now()+'-t.'+ext;await db.storage.from('thumbnails').upload(tp,f);const {data}=db.storage.from('thumbnails').getPublicUrl(tp);thumbUrl=data?.publicUrl;}
+    if(f.type.startsWith('image/')){
+      const tp=S.user.id+'/'+Date.now()+'-t.'+ext;
+      const {error:tErr}=await db.storage.from('thumbnails').upload(tp,f);
+      if(!tErr){const {data}=db.storage.from('thumbnails').getPublicUrl(tp);thumbUrl=data?.publicUrl||null;}
+    }
     await db.from('content').insert({creator_id:S.user.id,title,description:desc,content_type:f.type.startsWith('video/')?'video':'photo',is_free:isFree,price,is_nsfw:S.contentLevel>=2,content_level:S.contentLevel,ai_moderation_status:'pending',thumbnail_url:thumbUrl,file_urls:[path],tags,is_published:true});
     closeModal('modal-upload');showToast('Content published ✦','success');loadCreatorDash();
   } catch(e){err.textContent=e.message||'Upload failed';err.style.display='block';}
@@ -1253,11 +1268,25 @@ async function obsStep5() {
   const btn=document.getElementById('ob-btn5');btn.disabled=true;btn.textContent='Uploading...';
   try {
     for(let i=0;i<S.obFiles.length;i++){
-      const f=S.obFiles[i], ext=f.name.split('.').pop(), path=S.user.id+'/'+Date.now()+'-'+i+'.'+ext;
-      await db.storage.from('content').upload(path,f);
+      const f=S.obFiles[i], ext=f.name.split('.').pop().toLowerCase(), path=S.user.id+'/'+Date.now()+'-'+i+'.'+ext;
+      const {error:upErr}=await db.storage.from('content').upload(path,f);
+      if(upErr) throw new Error('Upload failed: '+upErr.message);
       let thumbUrl=null;
-      if(f.type.startsWith('image/')){const tp=S.user.id+'/'+Date.now()+'-t'+i+'.'+ext;await db.storage.from('thumbnails').upload(tp,f);const {data}=db.storage.from('thumbnails').getPublicUrl(tp);thumbUrl=data?.publicUrl;}
-      await db.from('content').insert({creator_id:S.user.id,title:'Photo '+(i+1),content_type:f.type.startsWith('video/')?'video':'photo',is_free:i<2,is_published:true,content_level:0,ai_moderation_status:'pending',thumbnail_url:thumbUrl,file_urls:[path]});
+      if(f.type.startsWith('image/')){
+        const tp=S.user.id+'/'+Date.now()+'-t'+i+'.'+ext;
+        const {error:tErr}=await db.storage.from('thumbnails').upload(tp,f);
+        if(!tErr){
+          const {data}=db.storage.from('thumbnails').getPublicUrl(tp);
+          thumbUrl=data?.publicUrl||null;
+        }
+      }
+      await db.from('content').insert({
+        creator_id:S.user.id, title:'Photo '+(i+1),
+        content_type:f.type.startsWith('video/')?'video':'photo',
+        is_free:i<2, is_published:true,
+        content_level:0, ai_moderation_status:'pending',
+        thumbnail_url:thumbUrl, file_urls:[path]
+      });
     }
     showObs(6);
   } catch(e){err.textContent=e.message||'Upload failed. Please try again.';err.style.display='block';}
@@ -1443,7 +1472,14 @@ async function init(){
   updateNav();loadCreators();updateFounderBar();
   const hash=window.location.hash;
   if(hash==='#join') setTimeout(()=>openAuth('signup','creator'),500);
-  if(hash==='#admin') setTimeout(()=>navigate('admin'),500);
+  if(hash==='#admin') {
+    // Wait for profile to load before navigating to admin
+    setTimeout(()=>{
+      if(S.profile?.role==='admin') navigate('admin');
+      else if(!S.user) openAuth('login');
+      else showToast('Admin access requires admin account.','error');
+    },1500);
+  }
 }
 init();
 </script>
