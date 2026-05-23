@@ -443,14 +443,15 @@ footer a:hover{color:var(--gold)}
     <div class="card" style="margin-bottom:1rem">
       <div style="font-size:0.78rem;color:var(--gold);margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:0.08em">Your profile</div>
       <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
-        <button class="btn btn-outline btn-sm" onclick="goProfile()">View public profile</button>
+        <button class="btn btn-outline btn-sm" onclick="goProfile()">View public profile →</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyLink()">Copy link</button>
       </div>
     </div>
     <div id="cd-free-warn" style="display:none" class="info-box">💡 <strong>Add free preview content</strong> — Creators with 2-3 free previews get 3x more subscribers. <button class="btn btn-gold btn-sm" style="margin-left:0.5rem" onclick="openUpload()">Upload now</button></div>
   </div>
   <div id="dt-content" class="dash-section">
     <div class="section-hdr"><span style="font-size:1rem;color:var(--white)">My Content</span><button class="btn btn-gold btn-sm" onclick="openUpload()">+ Upload</button></div>
-    <div id="cd-content-list" class="content-rows"><div class="loader"></div></div>
+    <div id="cd-content-list" class="content-rows"></div>
   </div>
   <div id="dt-payouts" class="dash-section">
     <div class="card card-gold" style="max-width:400px;margin-bottom:1.5rem">
@@ -471,7 +472,7 @@ footer a:hover{color:var(--gold)}
             <p class="form-hint" style="margin-top:0.35rem">JPG or PNG recommended</p>
           </div>
         </div>
-        <input type="file" id="set-av-file" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+        <input type="file" id="set-av-file" accept="image/*" style="display:none" onchange="previewAvatar(this)">
       </div>
       <div class="form-group"><label class="form-label">Display name</label><input class="form-input" type="text" id="set-name" placeholder="Your display name"></div>
       <div class="form-group"><label class="form-label">Bio</label><textarea class="form-input" id="set-bio" rows="3" style="resize:vertical"></textarea></div>
@@ -1174,12 +1175,25 @@ async function loadCreatorDash() {
 }
 function renderDashContent() {
   const list=document.getElementById('cd-content-list');
-  if(!S.myContent?.length){list.innerHTML='<div class="empty"><div class="empty-icon">◈</div><h3>No content yet</h3><button class="btn btn-gold btn-sm" style="margin-top:1rem" onclick="openUpload()">Upload Now</button></div>';return;}
+  if(!list) return;
+  if(!S.myContent?.length){
+    list.innerHTML='<div class="empty"><div class="empty-icon">◈</div><h3>No content yet</h3><p>Upload your first piece to start earning</p><button class="btn btn-gold btn-sm" style="margin-top:1rem" onclick="openUpload()">Upload Now</button></div>';
+    return;
+  }
   list.innerHTML=S.myContent.map(c=>{
     const tc=c.is_free?'var(--success)':c.price?'var(--gold)':'var(--muted)';
     const tl=c.is_free?'🔓 Free':c.price?'💰 $'+parseFloat(c.price).toFixed(2)+' PPV':'🔒 Subscribers';
     const cid=c.id;
-    return '<div class="content-row"><div class="row-thumb">'+(c.thumbnail_url?'<img src="'+esc(c.thumbnail_url)+'">':' ◈')+'</div><div class="row-info"><div class="row-title">'+esc(c.title)+'</div><div class="row-meta"><span style="color:'+tc+';font-weight:500">'+tl+'</span><span>'+(c.view_count||0)+' views &middot; '+timeAgo(c.created_at)+'</span></div></div><div class="row-actions"><button class="btn btn-outline btn-sm" onclick="openModify(\''+cid+'\')">Edit</button><button class="btn btn-danger btn-sm" onclick="delContent(\''+cid+'\')">Delete</button></div></div>';
+    return '<div class="content-row">'
+      +'<div class="row-thumb">'+(c.thumbnail_url?'<img src="'+esc(c.thumbnail_url)+'">':'◈')+'</div>'
+      +'<div class="row-info">'
+      +'<div class="row-title">'+esc(c.title)+'</div>'
+      +'<div class="row-meta"><span style="color:'+tc+';font-weight:500">'+tl+'</span><span>'+(c.view_count||0)+' views · '+timeAgo(c.created_at)+'</span></div>'
+      +'</div>'
+      +'<div class="row-actions">'
+      +'<button class="btn btn-outline btn-sm" onclick="openModify(\''+cid+'\')">Edit</button>'
+      +'<button class="btn btn-danger btn-sm" onclick="delContent(\''+cid+'\')">Delete</button>'
+      +'</div></div>';
   }).join('');
 }
 function switchDashTab(tab, btn) {
@@ -1381,9 +1395,15 @@ function previewAvatar(input) {
   if (!file) return;
   const previewId = input.id === 'ob-av-file' ? 'ob-av-preview' : 'set-av-preview';
   const el = document.getElementById(previewId);
-  el.innerHTML = '<img src="'+URL.createObjectURL(file)+'" style="width:100%;height:100%;object-fit:cover">';
-  // Auto-upload if in settings (not onboarding)
-  if (input.id === 'set-av-file') uploadAvatar(input);
+  if (!el) return;
+  // Show preview immediately
+  const objectUrl = URL.createObjectURL(file);
+  el.innerHTML = '<img src="'+objectUrl+'" style="width:100%;height:100%;object-fit:cover">';
+  // Upload if in settings
+  if (input.id === 'set-av-file') {
+    showToast('Uploading photo...', 'success');
+    uploadAvatar(input);
+  }
 }
 
 async function uploadAvatar(input) {
