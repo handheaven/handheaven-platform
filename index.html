@@ -872,12 +872,14 @@ async function doSignup() {
   btn.disabled=false;btn.textContent='Create Account';
   if(error){err.textContent=error.message;err.style.display='block';return;}
   if(data.user) {
-    await db.from('profiles').upsert({id:data.user.id,role:S.selectedRole},{onConflict:'id'});
-    if(S.selectedRole==='creator') {
-      try {
-        await fetch(SURL+'/functions/v1/swift-service',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SKEY},body:JSON.stringify({username:email.split('@')[0],email})});
-      } catch(e){}
-    }
+    try {
+      await db.from('profiles').upsert({id:data.user.id,role:S.selectedRole},{onConflict:'id'});
+      if(S.selectedRole==='creator') {
+        try {
+          await fetch(SURL+'/functions/v1/swift-service',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SKEY},body:JSON.stringify({username:email.split('@')[0],email})});
+        } catch(e){}
+      }
+    } catch(e) { console.log('Profile setup error:', e.message); }
   }
   const b=document.getElementById('confirm-banner');
   b.textContent='✦ Confirmation email sent to '+email+'. Please check your inbox to activate your account.';
@@ -942,15 +944,23 @@ async function loadCreators(search='') {
   const grid=document.getElementById('creator-grid');
   if(!grid) return;
   grid.innerHTML='<div class="loader"></div>';
+  // Timeout fallback — never leave infinite spinner
+  const timeout=setTimeout(()=>{
+    if(grid.innerHTML.includes('loader'))
+      grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">◈</div><p>Could not load creators. Please refresh.</p></div>';
+  }, 8000);
   try {
     let q=db.from('profiles').select('*').eq('role','creator').eq('is_active',true).eq('is_onboarded',true).order('subscriber_count',{ascending:false});
     if(search) q=q.ilike('display_name','%'+search+'%');
-    const {data}=await q;
+    const {data, error}=await q;
+    clearTimeout(timeout);
+    if(error) throw new Error(error.message);
     S.creators=data||[];
     const c=document.getElementById('creator-count');
     if(c) c.textContent=S.creators.length+' creator'+(S.creators.length!==1?'s':'');
     renderCreators(S.creators);
   } catch(e) {
+    clearTimeout(timeout);
     grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">◈</div><p>Could not load creators. Please refresh.</p></div>';
   }
 }
@@ -966,12 +976,20 @@ function renderCreators(list) {
 }
 function debSearch(v){clearTimeout(S.searchTimer);S.searchTimer=setTimeout(()=>loadCreators(v),350);}
 async function updateFounderBar() {
-  const {count}=await db.from('profiles').select('*',{count:'exact',head:true}).eq('role','creator').eq('is_onboarded',true);
-  const taken=Math.min(count||0,20), left=Math.max(0,20-taken), pct=Math.min(100,Math.round((taken/20)*100));
-  const fl=document.getElementById('founder-label'), ll=document.getElementById('founder-left-label'), bar=document.getElementById('founder-bar');
-  if(fl) fl.textContent=taken+' of 20 founding spots claimed';
-  if(ll) ll.textContent=left>0?left+' remaining':'All spots filled';
-  if(bar) bar.style.width=pct+'%';
+  const fl=document.getElementById('founder-label');
+  const ll=document.getElementById('founder-left-label');
+  const bar=document.getElementById('founder-bar');
+  try {
+    const {count}=await db.from('profiles').select('*',{count:'exact',head:true}).eq('role','creator').eq('is_onboarded',true);
+    const taken=Math.min(count||0,20), left=Math.max(0,20-taken), pct=Math.min(100,Math.round((taken/20)*100));
+    if(fl) fl.textContent=taken+' of 20 founding spots claimed';
+    if(ll) ll.textContent=left>0?left+' remaining':'All spots filled';
+    if(bar) bar.style.width=pct+'%';
+  } catch(e) {
+    if(fl) fl.textContent='20 founding spots available';
+    if(ll) ll.textContent='Join free forever';
+    if(bar) bar.style.width='0%';
+  }
 }
 
 // ============================================
@@ -1127,24 +1145,32 @@ async function loadCreatorDash() {
   document.getElementById('set-bio').value=p.bio||'';
   document.getElementById('set-price').value=p.subscription_price||9.99;
   document.getElementById('set-payout').value=p.payout_method||'paxum';
-  // Show current avatar in settings
-  const setAv = document.getElementById('set-av-preview');
-  if(setAv) setAv.innerHTML = p.avatar_url ? '<img src="'+esc(p.avatar_url)+'" style="width:100%;height:100%;object-fit:cover">' : '✦';
-  const {data:earnings}=await db.from('earnings').select('net_amount,type').eq('creator_id',S.user.id);
-  const subE=(earnings||[]).filter(e=>e.type==='subscription').reduce((s,e)=>s+parseFloat(e.net_amount||0),0);
-  const ppvE=(earnings||[]).filter(e=>e.type==='purchase').reduce((s,e)=>s+parseFloat(e.net_amount||0),0);
-  document.getElementById('cd-sub-earn').textContent='$'+subE.toFixed(2);
-  document.getElementById('cd-ppv-earn').textContent='$'+ppvE.toFixed(2);
+  const setAv=document.getElementById('set-av-preview');
+  if(setAv) setAv.innerHTML=p.avatar_url?'<img src="'+esc(p.avatar_url)+'" style="width:100%;height:100%;object-fit:cover">':'✦';
+  try {
+    const {data:earnings}=await db.from('earnings').select('net_amount,type').eq('creator_id',S.user.id);
+    const subE=(earnings||[]).filter(e=>e.type==='subscription').reduce((s,e)=>s+parseFloat(e.net_amount||0),0);
+    const ppvE=(earnings||[]).filter(e=>e.type==='purchase').reduce((s,e)=>s+parseFloat(e.net_amount||0),0);
+    document.getElementById('cd-sub-earn').textContent='$'+subE.toFixed(2);
+    document.getElementById('cd-ppv-earn').textContent='$'+ppvE.toFixed(2);
+  } catch(e) {
+    document.getElementById('cd-sub-earn').textContent='$0.00';
+    document.getElementById('cd-ppv-earn').textContent='$0.00';
+  }
   document.getElementById('cd-total-earn').textContent='$'+parseFloat(p.total_earnings||0).toFixed(2);
-  const {data:content}=await db.from('content').select('*').eq('creator_id',S.user.id).order('created_at',{ascending:false});
-  S.myContent=content||[];
-  const fr=S.myContent.filter(c=>c.is_free).length;
-  const sub=S.myContent.filter(c=>!c.is_free&&!c.price).length;
-  const ppv=S.myContent.filter(c=>!c.is_free&&c.price>0).length;
-  document.getElementById('cd-content-count').textContent=S.myContent.filter(c=>c.is_published).length;
-  document.getElementById('cd-content-break').textContent=fr+' free · '+sub+' locked · '+ppv+' PPV';
-  document.getElementById('cd-free-warn').style.display=(S.myContent.length>0&&fr===0)?'block':'none';
-  renderDashContent();
+  try {
+    const {data:content}=await db.from('content').select('*').eq('creator_id',S.user.id).order('created_at',{ascending:false});
+    S.myContent=content||[];
+    const fr=S.myContent.filter(c=>c.is_free).length;
+    const sub=S.myContent.filter(c=>!c.is_free&&!c.price).length;
+    const ppv=S.myContent.filter(c=>!c.is_free&&c.price>0).length;
+    document.getElementById('cd-content-count').textContent=S.myContent.filter(c=>c.is_published).length;
+    document.getElementById('cd-content-break').textContent=fr+' free · '+sub+' locked · '+ppv+' PPV';
+    document.getElementById('cd-free-warn').style.display=(S.myContent.length>0&&fr===0)?'block':'none';
+    renderDashContent();
+  } catch(e) {
+    showToast('Could not load content. Please refresh.','error');
+  }
 }
 function renderDashContent() {
   const list=document.getElementById('cd-content-list');
@@ -1168,10 +1194,15 @@ async function saveSettings() {
   const payout=document.getElementById('set-payout').value;
   if(!name){showToast('Display name is required','error');return;}
   if(!price||price<3){showToast('Minimum price is $3','error');return;}
-  const {error}=await db.from('profiles').update({display_name:name,bio,subscription_price:price,payout_method:payout,updated_at:new Date().toISOString()}).eq('id',S.user.id);
-  if(error){showToast(error.message,'error');return;}
-  S.profile={...S.profile,display_name:name,bio,subscription_price:price,payout_method:payout};
-  showToast('Settings saved ✦','success');updateNav();
+  try {
+    const {error}=await db.from('profiles').update({display_name:name,bio,subscription_price:price,payout_method:payout,updated_at:new Date().toISOString()}).eq('id',S.user.id);
+    if(error) throw new Error(error.message);
+    S.profile={...S.profile,display_name:name,bio,subscription_price:price,payout_method:payout};
+    showToast('Settings saved ✦','success');
+    updateNav();
+  } catch(e) {
+    showToast('Error saving settings: '+e.message,'error');
+  }
 }
 async function reqPayout() {
   const bal=parseFloat(S.profile?.pending_payout||0);
@@ -1211,19 +1242,31 @@ async function delContent(id) {
 // ============================================
 async function loadBuyerDash() {
   if(!S.user) return;
-  const {data:subs}=await db.from('subscriptions').select('*,creator:creator_id(display_name,username,avatar_url,subscription_price)').eq('buyer_id',S.user.id).eq('status','active');
   const sl=document.getElementById('bd-subs-list');
-  if(!subs?.length){sl.innerHTML='<div class="empty"><div class="empty-icon">◈</div><h3>No active subscriptions</h3><button class="btn btn-gold btn-sm" style="margin-top:1rem" onclick="navigate(\'home\')">Discover Creators</button></div>';}
-  else {
-    sl.innerHTML=subs.map(s=>{
-      const c=s.creator, name=c?.display_name||c?.username||'Creator';
-      return '<div class="admin-row"><div class="admin-avatar">'+(c?.avatar_url?'<img src="'+esc(c.avatar_url)+'">':getInitials(name))+'</div><div class="admin-info"><div class="admin-name">'+esc(name)+'</div><div class="admin-meta">$'+parseFloat(s.price_paid).toFixed(2)+'/mo · Renews '+new Date(s.expires_at).toLocaleDateString()+'</div></div><div class="admin-actions"><button class="btn btn-outline btn-sm" onclick="navigate(\'profile\',{username:\''+esc(c?.username||s.creator_id)+'\'})" >View</button><button class="btn btn-danger btn-sm" onclick="cancelSub(\''+s.creator_id+'\')">Cancel</button></div></div>';
-    }).join('');
-  }
-  const {data:purchases}=await db.from('purchases').select('*,content:content_id(title,thumbnail_url),creator:creator_id(display_name,username)').eq('buyer_id',S.user.id).order('purchased_at',{ascending:false});
   const pl=document.getElementById('bd-purchases-list');
-  if(!purchases?.length){pl.innerHTML='<div class="empty"><div class="empty-icon">◈</div><h3>No purchases yet</h3></div>';}
-  else{pl.innerHTML=purchases.map(p=>'<div class="admin-row"><div class="row-thumb">'+(p.content?.thumbnail_url?'<img src="'+esc(p.content.thumbnail_url)+'">':'◈')+'</div><div class="admin-info"><div class="admin-name">'+esc(p.content?.title||'Content')+'</div><div class="admin-meta">by '+esc(p.creator?.display_name||p.creator?.username||'Creator')+' · $'+parseFloat(p.price_paid).toFixed(2)+' · '+timeAgo(p.purchased_at)+'</div></div></div>').join('');}
+  try {
+    const {data:subs}=await db.from('subscriptions').select('*,creator:creator_id(display_name,username,avatar_url,subscription_price)').eq('buyer_id',S.user.id).eq('status','active');
+    if(!subs?.length){
+      sl.innerHTML='<div class="empty"><div class="empty-icon">◈</div><h3>No active subscriptions</h3><button class="btn btn-gold btn-sm" style="margin-top:1rem" onclick="navigate(\'home\')">Discover Creators</button></div>';
+    } else {
+      sl.innerHTML=subs.map(s=>{
+        const c=s.creator, name=c?.display_name||c?.username||'Creator';
+        return '<div class="admin-row"><div class="admin-avatar">'+(c?.avatar_url?'<img src="'+esc(c.avatar_url)+'">':getInitials(name))+'</div><div class="admin-info"><div class="admin-name">'+esc(name)+'</div><div class="admin-meta">$'+parseFloat(s.price_paid).toFixed(2)+'/mo · Renews '+new Date(s.expires_at).toLocaleDateString()+'</div></div><div class="admin-actions"><button class="btn btn-outline btn-sm" onclick="navigate(\'profile\',{username:\''+esc(c?.username||s.creator_id)+'\'})">View</button><button class="btn btn-danger btn-sm" onclick="cancelSub(\''+s.creator_id+'\')">Cancel</button></div></div>';
+      }).join('');
+    }
+  } catch(e) {
+    sl.innerHTML='<div class="empty"><div class="empty-icon">◈</div><p>Could not load subscriptions. Please refresh.</p></div>';
+  }
+  try {
+    const {data:purchases}=await db.from('purchases').select('*,content:content_id(title,thumbnail_url),creator:creator_id(display_name,username)').eq('buyer_id',S.user.id).order('purchased_at',{ascending:false});
+    if(!purchases?.length){
+      pl.innerHTML='<div class="empty"><div class="empty-icon">◈</div><h3>No purchases yet</h3></div>';
+    } else {
+      pl.innerHTML=purchases.map(p=>'<div class="admin-row"><div class="row-thumb">'+(p.content?.thumbnail_url?'<img src="'+esc(p.content.thumbnail_url)+'">':'◈')+'</div><div class="admin-info"><div class="admin-name">'+esc(p.content?.title||'Content')+'</div><div class="admin-meta">by '+esc(p.creator?.display_name||p.creator?.username||'Creator')+' · $'+parseFloat(p.price_paid).toFixed(2)+' · '+timeAgo(p.purchased_at)+'</div></div></div>').join('');
+    }
+  } catch(e) {
+    pl.innerHTML='<div class="empty"><div class="empty-icon">◈</div><p>Could not load purchases. Please refresh.</p></div>';
+  }
 }
 function switchBuyerTab(tab, btn) {
   document.querySelectorAll('#page-buyer-dashboard .dash-section').forEach(s=>s.classList.remove('active'));
@@ -1573,34 +1616,38 @@ function updEarnings(v){const p=parseFloat(v)||9.99;const el=document.getElement
 // ============================================
 async function loadAdminData() {
   if(!S.profile||S.profile.role!=='admin'){navigate('home');showToast('Access denied.','error');return;}
-  const [cr,by,su,re,pa,ea]=await Promise.all([
-    db.from('profiles').select('*').eq('role','creator').order('created_at',{ascending:false}),
-    db.from('profiles').select('*').eq('role','buyer').order('created_at',{ascending:false}),
-    db.from('subscriptions').select('*').eq('status','active'),
-    db.from('reports').select('*,reporter:reporter_id(display_name,username),reported:reported_id(display_name,username)').eq('status','open').order('created_at',{ascending:false}),
-    db.from('profiles').select('pending_payout,display_name,username').eq('role','creator').gt('pending_payout',0),
-    db.from('earnings').select('gross_amount,gateway_fee,platform_fee,net_amount,type')
-  ]);
-  const creators=cr.data||[], buyers=by.data||[], subs=su.data||[], reports=re.data||[], payouts=pa.data||[], earnings=ea.data||[];
-  const totalP=payouts.reduce((s,p)=>s+parseFloat(p.pending_payout||0),0);
-  const e=id=>document.getElementById(id);
-  e('adm-creators').textContent=creators.length;e('adm-buyers').textContent=buyers.length;
-  e('adm-subs').textContent=subs.length;e('adm-reports').textContent=reports.length;
-  e('adm-payouts').textContent='$'+totalP.toFixed(2);
-  if(reports.length>0){const b=e('adm-report-badge');b.textContent='⚠ '+reports.length+' open report'+(reports.length!==1?'s':'');b.style.display='inline-flex';}
-  const subE=earnings.filter(x=>x.type==='subscription'), ppvE=earnings.filter(x=>x.type==='purchase');
-  const s1g=subE.reduce((s,x)=>s+parseFloat(x.gross_amount||0),0);
-  const s1f=subE.reduce((s,x)=>s+parseFloat(x.gateway_fee||0),0);
-  const s2g=ppvE.reduce((s,x)=>s+parseFloat(x.gross_amount||0),0);
-  const s2f=ppvE.reduce((s,x)=>s+parseFloat(x.gateway_fee||0),0);
-  const s2n=s2g-s2f, s1n=s1g-s1f;
-  e('s1-gross').textContent='$'+s1g.toFixed(2);e('s1-fee').textContent='-$'+s1f.toFixed(2);e('s1-net').textContent='$'+s1n.toFixed(2);
-  e('s2-gross').textContent='$'+s2g.toFixed(2);e('s2-fee').textContent='-$'+s2f.toFixed(2);e('s2-net').textContent='$'+s2n.toFixed(2);
-  e('s2-creator').textContent='$'+(s2n*0.85).toFixed(2);e('s2-hh').textContent='$'+(s2n*0.15).toFixed(2);
-  e('adm-total').textContent='$'+(s1n+s2n*0.15).toFixed(2);
-  const {count:mc}=await db.from('content').select('*',{count:'exact',head:true}).in('ai_moderation_status',['needs_review','rejected_minor']);
-  e('adm-mod').textContent=mc||0;
-  renderAdmCreators(creators);renderAdmBuyers(buyers);renderAdmReports(reports);renderAdmPayouts(payouts);
+  try {
+    const [cr,by,su,re,pa,ea]=await Promise.all([
+      db.from('profiles').select('*').eq('role','creator').order('created_at',{ascending:false}),
+      db.from('profiles').select('*').eq('role','buyer').order('created_at',{ascending:false}),
+      db.from('subscriptions').select('*').eq('status','active'),
+      db.from('reports').select('*,reporter:reporter_id(display_name,username),reported:reported_id(display_name,username)').eq('status','open').order('created_at',{ascending:false}),
+      db.from('profiles').select('pending_payout,display_name,username').eq('role','creator').gt('pending_payout',0),
+      db.from('earnings').select('gross_amount,gateway_fee,platform_fee,net_amount,type')
+    ]);
+    const creators=cr.data||[], buyers=by.data||[], subs=su.data||[], reports=re.data||[], payouts=pa.data||[], earnings=ea.data||[];
+    const totalP=payouts.reduce((s,p)=>s+parseFloat(p.pending_payout||0),0);
+    const e=id=>document.getElementById(id);
+    e('adm-creators').textContent=creators.length;e('adm-buyers').textContent=buyers.length;
+    e('adm-subs').textContent=subs.length;e('adm-reports').textContent=reports.length;
+    e('adm-payouts').textContent='$'+totalP.toFixed(2);
+    if(reports.length>0){const b=e('adm-report-badge');b.textContent='⚠ '+reports.length+' open report'+(reports.length!==1?'s':'');b.style.display='inline-flex';}
+    const subE=earnings.filter(x=>x.type==='subscription'), ppvE=earnings.filter(x=>x.type==='purchase');
+    const s1g=subE.reduce((s,x)=>s+parseFloat(x.gross_amount||0),0);
+    const s1f=subE.reduce((s,x)=>s+parseFloat(x.gateway_fee||0),0);
+    const s2g=ppvE.reduce((s,x)=>s+parseFloat(x.gross_amount||0),0);
+    const s2f=ppvE.reduce((s,x)=>s+parseFloat(x.gateway_fee||0),0);
+    const s2n=s2g-s2f, s1n=s1g-s1f;
+    e('s1-gross').textContent='$'+s1g.toFixed(2);e('s1-fee').textContent='-$'+s1f.toFixed(2);e('s1-net').textContent='$'+s1n.toFixed(2);
+    e('s2-gross').textContent='$'+s2g.toFixed(2);e('s2-fee').textContent='-$'+s2f.toFixed(2);e('s2-net').textContent='$'+s2n.toFixed(2);
+    e('s2-creator').textContent='$'+(s2n*0.85).toFixed(2);e('s2-hh').textContent='$'+(s2n*0.15).toFixed(2);
+    e('adm-total').textContent='$'+(s1n+s2n*0.15).toFixed(2);
+    const {count:mc}=await db.from('content').select('*',{count:'exact',head:true}).in('ai_moderation_status',['needs_review','rejected_minor']);
+    e('adm-mod').textContent=mc||0;
+    renderAdmCreators(creators);renderAdmBuyers(buyers);renderAdmReports(reports);renderAdmPayouts(payouts);
+  } catch(e) {
+    showToast('Error loading admin data. Please refresh.','error');
+  }
 }
 function renderAdmCreators(list) {
   const el=document.getElementById('adm-tab-creators');
